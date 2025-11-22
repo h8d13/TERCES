@@ -1,6 +1,6 @@
 #!/bin/bash
 REPO="https://github.com/h8d13/TERCES"
-VERSION_FILE="VERSION"
+VERSION_FILE="version"
 
 [[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version|update)$ ]] || { echo "Usage: $0 unlock | encrypt | decrypt | reset | version | update"; exit 1; }
 
@@ -20,7 +20,7 @@ VERSION_FILE="VERSION"
     cur_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
     cur_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
 
-    # Clone to temp, check VERSION and commit hash
+    # Clone to temp, check file and commit hash
     tmp_dir=$(mktemp -d)
     git clone --depth 1 "$REPO" "$tmp_dir" || { echo "Clone failed"; rm -rf "$tmp_dir"; exit 1; }
 
@@ -28,8 +28,9 @@ VERSION_FILE="VERSION"
     new_hash=$(git -C "$tmp_dir" rev-parse --short HEAD 2>/dev/null)
 
     if [[ -z "$new_ver" ]]; then
-        echo "No VERSION in remote repo. Nothing to update."
+        echo "No version in remote repo. Nothing to update."
         rm -rf "$tmp_dir"
+        echo "Cleaning up tmp dir."
         exit 1
     fi
 
