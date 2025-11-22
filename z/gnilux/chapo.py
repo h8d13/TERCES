@@ -15,12 +15,16 @@ from .admin import _random, _suuid, VERSION
 from .handlers import _error, _nf_warn, _debug, _success
 
 class U2FKey:
-    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, use_pin: bool = False, secrets_dir: str = f".d/terces-{VERSION}"):
-        self.mappings_file: str = mappings_file or '/etc/u2f_mappings' # sane fallback
+    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, secrets_dir: str = f".d/terces-{VERSION}"):
+        self.mappings_file: str = mappings_file or '/etc/u2f_mappings'
         self.rp_id: str = rp_id or f"pam://{socket.gethostname()}"
-        self.use_pin: bool = use_pin
         self.secrets_dir: str = secrets_dir
         self.secrets_index: str = f"{self.secrets_dir}/_tm.json"
+
+    def _pin_required(self, ctap: Ctap2) -> bool:
+        """Auto-detect if PIN is set on the device"""
+        # clientPin option: True = PIN is set, False = PIN not set, None = not supported
+        return ctap.info.options.get("clientPin", False)
 
     def check_perms(self):
         self.perms = oct(os.stat(self.mappings_file).st_mode)[-3:]
@@ -56,11 +60,10 @@ class U2FKey:
         client_data_hash = hashlib.sha256(b"challenge").digest()
 
         try:
-            if self.use_pin:
+            if self._pin_required(ctap):
                 client_pin = ClientPin(ctap)
-
                 retries = client_pin.get_pin_retries()
-                _debug(f"PIN/Biometrics retries remaining: {retries}")
+                _debug(f"PIN retries remaining: {retries}")
                 pin = getpass.getpass("Enter PIN: ")
                 pin_token = client_pin.get_pin_token(pin)
                 pin_auth = client_pin.protocol.authenticate(pin_token, client_data_hash)
@@ -73,15 +76,14 @@ class U2FKey:
                     pin_uv_param=pin_auth,
                     pin_uv_protocol=client_pin.protocol.VERSION
                 )
-                _debug(f"Got assertion with counter: {assertion.auth_data.counter}")
-
             else:
-                print("Touch Security Key...")
+                print("Touch security key...")
                 assertion = ctap.get_assertion(
                     self.rp_id,
                     client_data_hash,
                     [{"type": "public-key", "id": base64.b64decode(key_handle)}]
                 )
+            _debug(f"Assertion counter: {assertion.auth_data.counter}")
 
         except CtapError as e:
             if e.code == CtapError.ERR.PIN_INVALID:
