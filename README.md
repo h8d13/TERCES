@@ -16,7 +16,6 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 ./terces unlock    # Test auth
 ./terces encrypt   # Store secret (prompts: name, secret, optional description)
 ./terces decrypt   # Retrieve secret (prompts: name)
-./terces version   # Check for remote hash
 ./terces reset     # Deletes all stored keys
 ```
 
@@ -31,6 +30,7 @@ Security is being pro-active and finding edge-cases, so building each piece of c
 
 You can tho use:
 ```bash
+./terces version   # Check for remote hash
 ./terces update    # Clones fresh copy to different folder
 ```
 Then re-enroll manually.
