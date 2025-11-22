@@ -53,7 +53,10 @@ python3 -c "import uuid; print(f'pam://{str(uuid.uuid4())[:8]}')"
 ```
 
 ```json
-{"mappings_file": "/etc/u2f_mappings", "rp_id": "pam://a1b2c3d4"}
+{
+  "mappings_file": "/etc/u2f_mappings",
+  "rp_id": "pam://a1b2c3d4"
+}
 ```
 
 Then:
