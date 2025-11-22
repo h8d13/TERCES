@@ -1,8 +1,8 @@
 # Terces
 
-FIDO2 hardware key symetric manager. Interfaces directly with `CTAP2` protocol in Python.
+FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol locally in Python.
 
-Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES-256-GCM`.
+Encrypts/Decrypts secrets using your security key's `hmac-secret` extension using `AES-256-GCM`.
 
 In case your distro doesn't package directly:
 
