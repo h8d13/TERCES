@@ -9,8 +9,9 @@ get_local_ver() {
     [[ -n "$dir" ]] && basename "$dir" | sed 's/terces-//' || echo "none"
 }
 
-[[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version|update|portable)$ ]] || { echo "Usage: $0 unlock|encrypt|decrypt|reset|version|update|portable"; exit 1; }
+[[ "$1" =~ ^(setup|unlock|encrypt|decrypt|reset|version|update|portable)$ ]] || { echo "Usage: $0 setup|unlock|encrypt|decrypt|reset|version|update|portable"; exit 1; }
 
+[[ "$1" == "setup" ]] && { python -B z/setup.py; exit 0; }
 [[ "$1" == "portable" ]] && { python -B z/portable.py "$2"; exit 0; }
 
 [[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }

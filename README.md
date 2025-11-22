@@ -14,11 +14,12 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 > Find mapping path in `terces.cfg`
 
 ```bash
+./terces setup      # Generate mappings file
 ./terces unlock     # Test auth
 ./terces encrypt    # Store secret (prompts: name, secret, optional description)
 ./terces decrypt    # Retrieve secret (prompts: name)
-./terces portable   # Usage on portable (import/export) Set rp_id in config or same hostnames
 ./terces reset      # Deletes all locally stored keys
+./terces portable   # Usage on portable (import/export) Set rp_id in config or same hostnames
 ```
 
 >[!TIP]
