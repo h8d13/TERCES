@@ -1,6 +1,6 @@
 #decrypt.py
-# python-fido2 # python-cryptography
 from gnilux import (
+    CFG,
     U2FKey,
     uid,
     is_elevated,
@@ -12,7 +12,7 @@ from gnilux import (
 
 _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
 
-auth = U2FKey(mappings_file='/etc/u2f_mappings', use_pin=True)
+auth = U2FKey(mappings_file=CFG["mappings_file"], use_pin=CFG["use_pin"])
 
 # --- DECRYPT FLOW ---
 if auth.authenticate():

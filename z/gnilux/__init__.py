@@ -15,10 +15,12 @@ from .handlers import (
     _debug,
 )
 
+from .config import CFG
 from .chapo import U2FKey
 
 __all__ = [
     "VERSION",
+    "CFG",
     "U2FKey",
     "uid",
     "username",
