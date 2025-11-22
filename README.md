@@ -34,4 +34,4 @@ You can use:
 ./terces version   # Check for remote hash
 ./terces update    # Clones fresh copy to different folder
 ```
-Then re-enroll manually to upgrade.
+Then re-enroll manually to upgrade/migrate.
