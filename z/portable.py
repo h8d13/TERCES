@@ -6,9 +6,10 @@ import os
 import getpass
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-from gnilux import CFG, _success, _error
+from gnilux import CFG, VERSION, _success
 
-BOOTSTRAP_FILE = ".mappings.enc"
+DATA_DIR = f".d/terces-{VERSION}"
+BOOTSTRAP_FILE = f"{DATA_DIR}/.mappings.enc"
 
 def derive_key(pin: bytes, salt: bytes) -> bytes:
     kdf = Scrypt(salt=salt, length=32, n=2**14, r=8, p=1)
@@ -30,6 +31,7 @@ if sys.argv[1] == "export":
     cipher = AESGCM(key)
     ciphertext = cipher.encrypt(nonce, mappings, None)
 
+    os.makedirs(DATA_DIR, exist_ok=True)
     with open(BOOTSTRAP_FILE, "wb") as f:
         f.write(salt + nonce + ciphertext)
     _success(f"Exported to {BOOTSTRAP_FILE}")

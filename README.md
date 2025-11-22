@@ -34,7 +34,7 @@ The full output provides much useful info:
 | clientPin       | supported           | PIN is available                                |
 | FIDO_2_1        | supported           | Latest FIDO2 spec                               |
 
-Depending on the key model.
+Depending on the key model/age.
 
 ## Usage 🤫
 
