@@ -57,14 +57,15 @@ Depending on the key model/age.
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
 > Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
 
+See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth.
+
 ### Already setup on one machine
 
 >In case you have already set it up on machine using default config:
 
 You can still just export/import the original file which contains `rp_id`:
-> By default if it was not specified, **it uses the hostname** of machine that you first ran pamu2fcfg on. Make sure to update `rp_id` in `terces.cfg` to match.
-
-See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth.
+> By default if it was not specified, **it uses the hostname** of machine that you first ran `pamu2fcfg` on. 
+> Make sure to update `rp_id` in `terces.cfg` to match.
 
 ```bash
 # On the original
