@@ -4,9 +4,13 @@ FIDO2 hardware key symetric manager. Interfaces directly with `CTAP2` protocol i
 
 Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES-256-GCM`.
 
-- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version.
+- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
+
+> Helps you integrate with system + generate initial mappings.
 
 ## Usage
+
+> Global mappings require sudo.
 
 ```bash
 ./terces version   # Check for remote hash
