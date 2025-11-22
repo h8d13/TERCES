@@ -30,7 +30,7 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
 
 You can tho use:
-```
+```bash
 ./terces update    # Clones fresh copy to different folder
 ```
 Then re-enroll manually.
