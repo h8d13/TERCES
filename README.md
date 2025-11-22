@@ -1,6 +1,7 @@
 # Terces
 
 FIDO2 hardware key symetric manager. 
+
 Encrypts secrets using your security key's `hmac-secret` extension `AES-256-GCM`.
 
 ## Usage
