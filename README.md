@@ -16,7 +16,7 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 ./terces unlock    # Test auth
 ./terces encrypt   # Store secret (prompts: name, secret, optional description)
 ./terces decrypt   # Retrieve secret (prompts: name)
-./terces reset     # Deletes all stored keys
+./terces reset     # Deletes all locally stored keys
 ```
 
 >[!TIP]
