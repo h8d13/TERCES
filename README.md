@@ -55,7 +55,7 @@ Depending on the key model/age.
 
 >[!TIP]
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
-> Setup this project for local usage since the integration with browsers is already pretty neat, I wanted to have a way to achieve the same for local secrets.
+> Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
 
 ---
 
