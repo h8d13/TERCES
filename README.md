@@ -8,7 +8,7 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 
 > Helps you integrate with system + generate initial mappings.
 
-## Usage
+## Usage 🤫
 
 > Global mappings require sudo. Per-user mappings **DO NOT.**
 
