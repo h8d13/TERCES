@@ -10,13 +10,13 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 
 ## Usage
 
-> Global mappings require sudo.
+> Global mappings require sudo. Per-user mappings **DO NOT.**
 
 ```bash
-./terces version   # Check for remote hash
 ./terces unlock    # Test auth
 ./terces encrypt   # Store secret (prompts: name, secret, optional description)
 ./terces decrypt   # Retrieve secret (prompts: name)
+./terces version   # Check for remote hash
 ./terces reset     # Deletes all stored keys
 ```
 
