@@ -1,0 +1,54 @@
+#!/bin/bash
+# assumes base-devel and no systemd
+# thnx gentoo docs/users
+# https://wiki.gentoo.org/wiki/YubiKey/PAM
+
+set -e
+# ---- Check deps ----
+./build_deps || echo "Failed to setup build deps" && exit 1
+
+# ---- Build in /tmp to avoid unsafe directory names ----
+BUILD_DIR="/tmp/pam-u2f-build"
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+git clone https://github.com/Yubico/pam-u2f.git
+cd pam-u2f
+
+autoreconf --install
+./configure --with-pam-dir=/usr/lib/security
+make
+make install
+cd /
+rm -rf "$BUILD_DIR"
+
+# ---- U2F key setup ----
+# can use .config xdg for more control 
+touch /etc/u2f_mappings
+pamu2fcfg -u "$SUDO_USER" | tee -a /etc/u2f_mappings
+chmod 600 /etc/u2f_mappings
+
+echo "pam-u2f installation complete."
+echo "Now edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."
+
+### Passwordless sudo
+# edit /etc/pam.d/system-auth # tested on open-rc 
+# first laxist so that we don't lock out user
+#auth        sufficient pam_u2f.so      cue authfile=/etc/u2f_mappings
+
+#required (disables password)               #interactive   #path/to/userorglobal/mappings       
+
+#pinverification=1 # remove "cue" if using
+#userpresence=1 # same
+
+#[cue_prompt=they wants to touches its.] 
+
+##Example full setup:
+#auth       sufficient                              pam_u2f.so           pinverification=1 cue [cue_prompt=Touch security key.] authfile=/etc/u2f_mappings
+
+## SDDM integration (trace system-login > system-local-login)
+#edit /etc/pam.d/system-local-login
+#auth       sufficient pam_u2f.so       cue authfile=/etc/u2f_mappings
+
+## Can now enter empty password and key should flash for input and if you do enter password would also flash for input. 

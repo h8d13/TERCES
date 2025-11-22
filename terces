@@ -1,0 +1,6 @@
+#!/bin/bash
+# testunlock, encrypt, decrypt
+[[ "$1" =~ ^(unlock|encrypt|decrypt)$ ]] || { cat <<< "Usage: $0 unlock | encrypt | decrypt"; exit 1; }
+
+python -B z/"$1".py
+

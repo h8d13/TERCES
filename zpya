@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+dir_ex() {
+    [ -d "$1" ]
+}
+if ! dir_ex ".venv"; then
+    echo "Creating .venv ..."
+    if ! python -m venv .venv; then
+        echo "Failed to create .venv"
+        exit 1
+    fi
+    # shellcheck disable=SC1091
+    . ./.venv/bin/activate
+    pip install --upgrade pip && pip install -r requirements.txt
+    echo "Done."
+else
+    # shellcheck disable=SC1091
+    . ./.venv/bin/activate
+    echo "Re-using existing venv."
+fi
