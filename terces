@@ -1,6 +1,18 @@
 #!/bin/bash
-# testunlock, encrypt, decrypt
-[[ "$1" =~ ^(unlock|encrypt|decrypt)$ ]] || { cat <<< "Usage: $0 unlock | encrypt | decrypt"; exit 1; }
+[[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version)$ ]] || { echo "Usage: $0 unlock | encrypt | decrypt | reset | version"; exit 1; }
+
+[[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
+
+[[ "$1" == "version" ]] && {
+    local_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+    echo "Local:  $local_hash"
+    # Fetch latest from remote without merging
+    git fetch origin --quiet 2>/dev/null
+    remote_hash=$(git rev-parse --short origin/master 2>/dev/null || echo "unknown")
+    echo "Remote: $remote_hash"
+    [[ "$local_hash" == "$remote_hash" ]] && echo "Up to date." || echo "Update available: git pull"
+    exit 0
+}
 
 python -B z/"$1".py
 

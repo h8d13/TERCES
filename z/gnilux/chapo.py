@@ -20,13 +20,14 @@ class U2FKey:
         self.rp_id: str = rp_id or f"pam://{socket.gethostname()}"
         self.use_pin: bool = use_pin
         self.secrets_dir: str = secrets_dir
-        self.secrets_index: str = f"{self.secrets_dir}/tm.json"
+        self.secrets_index: str = f"{self.secrets_dir}/_tm.json"
 
     def check_perms(self):
         self.perms = oct(os.stat(self.mappings_file).st_mode)[-3:]
         perms = int(self.perms)  # Convert octal string to int
         _debug(f'Perms {perms} for {self.mappings_file}')
         if perms > 600:
+            _nf_warn("Key permissions unsufficient.")
             return False
         return True
 
@@ -205,56 +206,59 @@ class U2FKey:
         with open(self.secrets_index, "w") as f:
             json.dump(index, f, indent=2)
 
+    def _derive_filename(self, name: str) -> str:
+        """
+        Derive filename from name + credential-specific salt.
+        Using key_handle as salt: each FIDO2 credential is unique, so
+        hash(key_handle + name) produces different filenames per user/key.
+        Attacker needs both the name AND access to your specific key_handle.
+        Default lockout on keys is 8 attempts and can be up to 63 mixed chars.
+        Good luck ! 
+        """
+        salt = self.load_key_handle()
+        secret_id = hashlib.sha256((salt + name).encode()).hexdigest()[:16]
+        return f"{self.secrets_dir}/{secret_id}.enc"
+
     def encrypt_secret(self, name: str, plaintext: str | bytes, description: str = "") -> str:
-        """Encrypt a secret and return its UUID identifier"""
+        """Encrypt a secret using salted name-derived filename"""
         if isinstance(plaintext, str):
             plaintext = plaintext.encode()
-        
+
         key = self.get_terces(name.encode())
         nonce = _random(12)
         cipher = AESGCM(key)
         ciphertext = cipher.encrypt(nonce, plaintext, None)
-        
-        secret_id = _suuid()
-        filename = f"{self.secrets_dir}/{secret_id}.enc"
+
+        filename = self._derive_filename(name)
         os.makedirs(self.secrets_dir, exist_ok=True)
-        
+
         with open(filename, "wb") as f:
             f.write(nonce + ciphertext)
-        
-        index = self._load_index()
-        index[name] = {
-            "id": secret_id,
-            "description": description
-        }
-        self._save_index(index)
-        
-        _success(f"Secret encrypted: {name} -> {secret_id}")
-        return secret_id
+
+        # Optional log for user reference # NOT REQUIRED for decryption totally optional
+        from datetime import datetime
+        log = self._load_index()
+        log[_suuid()] = {"description": description, "time": datetime.now().isoformat()}
+        self._save_index(log)
+
+        _success(f"Secret encrypted: {name}")
+        return filename
 
     def decrypt_secret(self, name: str) -> str | None:
-        """Decrypt a secret using its name and suuid mapping"""
-        index = self._load_index()
-        entry = index.get(name)
-        
-        if not entry:
-            _error(f"No secret found with name: {name}")
-            return None
-        
-        secret_id = entry["id"]
-        filename = f"{self.secrets_dir}/{secret_id}.enc"
-        
+        """Decrypt a secret using salted name-derived filename"""
+        filename = self._derive_filename(name)
+
         if not os.path.exists(filename):
-            _error(f"Secret file not found: {secret_id}")
+            _error(f"No secret found for: {name}")
             return None
-        
+
         key = self.get_terces(name.encode())
-        
+
         with open(filename, "rb") as f:
             data = f.read()
-        
+
         nonce, ciphertext = data[:12], data[12:]
         cipher = AESGCM(key)
         plaintext = cipher.decrypt(nonce, ciphertext, None)
-        
+
         return plaintext.decode()
