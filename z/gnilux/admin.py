@@ -2,7 +2,6 @@ import os
 import uuid
 from pathlib import Path
 
-# Read version from VERSION file (relative to project root)
 _version_file = Path(__file__).parent.parent.parent / "VERSION"
 VERSION = _version_file.read_text().strip() if _version_file.exists() else "0000"
 

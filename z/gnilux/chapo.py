@@ -11,11 +11,11 @@ import getpass
 import socket
 import os
 
-from .admin import _random, _suuid
+from .admin import _random, _suuid, VERSION
 from .handlers import _error, _nf_warn, _debug, _success
 
 class U2FKey:
-    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, use_pin: bool = False, secrets_dir: str = ".d/terces"):
+    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, use_pin: bool = False, secrets_dir: str = f".d/terces-{VERSION}"):
         self.mappings_file: str = mappings_file or '/etc/u2f_mappings' # sane fallback
         self.rp_id: str = rp_id or f"pam://{socket.gethostname()}"
         self.use_pin: bool = use_pin
