@@ -72,7 +72,8 @@ Then re-enroll manually to upgrade/migrate.
 >In case you have already set it up on machine using default config:
 
 You can still just export/import the original file which contains `rp_id`:
-> By default if it was not specified it uses the hostname of the machine that you first ran this on. 
+> By default if it was not specified, **it uses the hostname** of machine that you first ran pamu2fcfg on.
+Make sure to update rp_id` in `terces.cfg` to match.
 
 ```bash
 ./terces portable export
