@@ -7,7 +7,7 @@ auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"])
 BOOTSTRAP_NAME = "_mappings"
 
 if len(sys.argv) < 2 or sys.argv[1] not in ("export", "import"):
-    print("Usage: portable.py export | import")
+    print("Usage: portable export | import")
     sys.exit(1)
 
 if sys.argv[1] == "export":
