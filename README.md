@@ -57,21 +57,7 @@ Depending on the key model/age.
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
 > Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
 
----
-
-*Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
-Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
-
-You can use:
-```bash
-./terces version   # Check for remote hash
-./terces update    # Clones fresh copy to different folder
-```
-Then re-enroll manually to upgrade/migrate.
-
----
-
-## Already setup on one machine
+### Already setup on one machine
 
 >In case you have already set it up on machine using default config:
 
@@ -116,3 +102,19 @@ sudo ./terces setup           # Registers key with your rp_id
 ./terces portable import | sudo tee /etc/u2f_mappings
 ./terces unlock               # Works - same rp_id, same key
 ```
+
+---
+
+## Updates
+
+*Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
+Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
+
+You can use:
+```bash
+./terces version   # Check for remote hash
+./terces update    # Clones fresh copy to different folder
+```
+Then re-enroll manually to upgrade/migrate.
+
+---
