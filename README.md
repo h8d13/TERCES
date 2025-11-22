@@ -8,7 +8,9 @@ In case your distro doesn't package directly:
 
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
 
-> Helps you integrate with system.
+> Helps you integrate with system even if not packaged by your distro, if it is:
+
+`sudo pacman -S pam-u2f`
 
 ## Usage 🤫
 
@@ -63,4 +65,17 @@ sudo ./terces setup           # Registers key with your rp_id
 # On new machine:
 ./terces portable import | sudo tee /etc/u2f_mappings
 ./terces unlock               # Works - same rp_id, same key
+```
+
+## Already setup on one machine
+
+>In case you have already set it up on machine using default config:
+
+You can still just export/import the original file which contains `rp_id`:
+```bash
+./terces portable export
+
+# Copy TERCES folder to new PC, then:
+./terces portable import | sudo tee /etc/u2f_mappings
+./terces unlock  # verify it works
 ```
