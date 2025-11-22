@@ -76,12 +76,15 @@ You can still just export/import the original file which contains `rp_id`:
 Make sure to update rp_id` in `terces.cfg` to match.
 
 ```bash
+# On the original
 ./terces portable export
 
-# Copy TERCES folder to new PC, then:
+# Copy TERCES folder to USB, then to new machine:
 ./terces portable import | sudo tee /etc/u2f_mappings
 ./terces unlock  # verify it works
 ```
+
+Or reset the key completly and start fresh.
 
 ### Portable installs
 
