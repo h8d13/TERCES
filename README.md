@@ -10,7 +10,31 @@ In case your distro doesn't package directly:
 
 > Helps you integrate with system even if not packaged by your distro, if it is:
 
-`sudo pacman -S pam-u2f`
+`sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
+
+**Useful:** Thanks to Olastor:
+
+-  `fido2-token -L`
+> List available devices.
+
+- `fido2-token -I /dev/hidrawX`
+- `fido2-token -I /dev/hidraw0 | grep -E "extension|algorithms"` > See key capabilities
+
+The full output provides much useful info: 
+
+| Property        | Value               | Notes                                           |
+|-----------------|---------------------|-------------------------------------------------|
+| hmac-secret     | supported           | Required for TERCES - derives encryption keys   |
+| algorithms      | es256, eddsa, es384 | Can use eddsa in config if you prefer           |
+| rk              | supported           | Resident keys work - "resident": true is viable |
+| remaining rk(s) | 99                  | Can store X more discoverable credentials       |
+| credProtect     | supported           | Credential protection levels available          |
+| pin retries     | 8                   | 8 PIN attempts before lockout                   |
+| minpinlen       | 4                   | Minimum PIN is 4 chars                          |
+| clientPin       | supported           | PIN is available                                |
+| FIDO_2_1        | supported           | Latest FIDO2 spec                               |
+
+Depending on the key model.
 
 ## Usage 🤫
 

@@ -7,14 +7,6 @@ This still unfortunatly doesn't provide as strong inegration as `systemd-crypten
 
 ---
 
-**Useful:** Thanks to olastor:
-
--  `fido2-token -L`
-> List available devices.
-
-- `fido2-token -I /dev/hidrawX`
-- `fido2-token -I /dev/hidraw0 | grep extension` > See key capabilities
-
 Script in repo builds `pam-u2f` from source, generates **system-wide** mappings, see inside script comments for `pam.d` configuration.
 
 >[!NOTE]
