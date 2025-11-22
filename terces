@@ -1,16 +1,37 @@
 #!/bin/bash
-[[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version)$ ]] || { echo "Usage: $0 unlock | encrypt | decrypt | reset | version"; exit 1; }
+REPO="https://github.com/h8d13/TERCES"
+VERSION_FILE="VERSION"
+
+[[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version|update)$ ]] || { echo "Usage: $0 unlock | encrypt | decrypt | reset | version | update"; exit 1; }
 
 [[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
 
 [[ "$1" == "version" ]] && {
+    ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
     local_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-    echo "Local:  $local_hash"
-    # Fetch latest from remote without merging
+    echo "TERCES-$ver (commit: $local_hash)"
     git fetch origin --quiet 2>/dev/null
     remote_hash=$(git rev-parse --short origin/master 2>/dev/null || echo "unknown")
-    echo "Remote: $remote_hash"
-    [[ "$local_hash" == "$remote_hash" ]] && echo "Up to date." || echo "Update available: git pull"
+    [[ "$local_hash" == "$remote_hash" ]] && echo "Up to date." || echo "Update available: ./terces update"
+    exit 0
+}
+
+[[ "$1" == "update" ]] && {
+    # Read current version, increment for new install
+    cur_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
+    new_ver=$(printf "%04d" $((10#$cur_ver + 1)))
+    new_dir="../TERCES-$new_ver"
+
+    echo "Current: TERCES-$cur_ver"
+    echo "Cloning fresh copy to: $new_dir"
+
+    git clone --depth 1 "$REPO" "$new_dir" || { echo "Clone failed"; exit 1; }
+    echo "$new_ver" > "$new_dir/$VERSION_FILE"
+
+    echo ""
+    echo "Done! New version at: $new_dir"
+    echo "Your current data in .d/ stays here untouched."
+    echo "cd $new_dir && ./terces version"
     exit 0
 }
 

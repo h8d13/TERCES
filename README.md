@@ -14,6 +14,7 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 
 ```bash
 ./terces version   # Check for remote hash
+./terces update    # Clones fresh copy to different folder
 ./terces unlock    # Test auth
 ./terces encrypt   # Store secret (prompts: name, secret, optional description)
 ./terces decrypt   # Retrieve secret (prompts: name)
