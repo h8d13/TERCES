@@ -30,16 +30,16 @@ echo "Edit the .cfg then sudo ./terces setup"
 echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."
 
 ### Passwordless sudo
-# edit /etc/pam.d/system-auth # tested on open-rc 
+# edit /etc/pam.d/system-auth # tested on open-rc
 # first laxist so that we don't lock out user
 #auth        sufficient pam_u2f.so      cue authfile=/etc/u2f_mappings
 
-#required (disables password)               #interactive   #path/to/userorglobal/mappings       
+#required (disables password)               #interactive   #path/to/userorglobal/mappings
 
 #pinverification=1 # remove "cue" if using
 #userpresence=1 # same
 
-#[cue_prompt=they wants to touches its.] 
+#[cue_prompt=they wants to touches its.]
 
 ##Example full setup:
 #auth       sufficient                              pam_u2f.so           pinverification=1 cue [cue_prompt=Touch security key.] authfile=/etc/u2f_mappings
@@ -48,4 +48,19 @@ echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accord
 #edit /etc/pam.d/system-local-login
 #auth       sufficient pam_u2f.so       cue authfile=/etc/u2f_mappings
 
-## Can now enter empty password and key should flash for input and if you do enter password would also flash for input. 
+## Can now enter empty password and key should flash for input and if you do enter password would also flash for input.
+
+### Using custom rp_id (portable setup)
+# If you set a custom rp_id in terces.cfg (e.g. "pam://a1b2c3d4") for portability,
+# PAM needs the same origin to find the credential:
+#
+#auth       sufficient pam_u2f.so       origin=pam://a1b2c3d4 cue authfile=/etc/u2f_mappings
+#
+# Without origin=, PAM defaults to pam://hostname which won't match your portable credential.
+#
+# Two options:
+# 1. Separate credentials - register once for PAM (default rp_id), once for TERCES (custom rp_id)
+#    Your key can hold multiple credentials (check: fido2-token -I /dev/hidraw0 | grep "remaining rk")
+#
+# 2. Same credential - use custom rp_id everywhere, configure PAM with origin=pam://your-rp-id
+#    Portable across machines, but PAM config must match on each machine 
