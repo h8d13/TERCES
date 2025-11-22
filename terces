@@ -2,14 +2,23 @@
 REPO="https://github.com/h8d13/TERCES"
 VERSION_FILE="version"
 
+# Get local version from .d/terces-XXXX directory name
+get_local_ver() {
+    local dir
+    dir=$(find ".d" -maxdepth 1 -type d -name 'terces-*' 2>/dev/null | head -1)
+    [[ -n "$dir" ]] && basename "$dir" | sed 's/terces-//' || echo "none"
+}
+
 [[ "$1" =~ ^(unlock|encrypt|decrypt|reset|version|update)$ ]] || { echo "Usage: $0 unlock | encrypt | decrypt | reset | version | update"; exit 1; }
 
 [[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
 
 [[ "$1" == "version" ]] && {
-    ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
+    local_ver=$(get_local_ver)
+    code_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
     local_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-    echo "TERCES-$ver (commit: $local_hash)"
+    echo "Code:    TERCES-$code_ver ($local_hash)"
+    echo "Data:    .d/terces-$local_ver"
     git fetch origin --quiet 2>/dev/null
     remote_hash=$(git rev-parse --short origin/master 2>/dev/null || echo "unknown")
     [[ "$local_hash" == "$remote_hash" ]] && echo "Up to date." || echo "Update available: ./terces update"
@@ -17,10 +26,10 @@ VERSION_FILE="version"
 }
 
 [[ "$1" == "update" ]] && {
-    cur_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
+    local_ver=$(get_local_ver)
+    code_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
     cur_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
 
-    # Clone to temp, check file and commit hash
     tmp_dir=$(mktemp -d)
     git clone --depth 1 "$REPO" "$tmp_dir" || { echo "Clone failed"; rm -rf "$tmp_dir"; exit 1; }
 
@@ -28,26 +37,37 @@ VERSION_FILE="version"
     new_hash=$(git -C "$tmp_dir" rev-parse --short HEAD 2>/dev/null)
 
     if [[ -z "$new_ver" ]]; then
-        echo "No version in remote repo. Nothing to update."
+        echo "No version in remote repo."
         rm -rf "$tmp_dir"
-        echo "Cleaning up tmp dir."
         exit 1
     fi
 
-    echo "Current: TERCES-$cur_ver ($cur_hash)"
+    echo "Code:    TERCES-$code_ver ($cur_hash)"
+    echo "Data:    .d/terces-$local_ver"
     echo "Latest:  TERCES-$new_ver ($new_hash)"
 
-    if [[ "$cur_ver" == "$new_ver" ]]; then
-        echo "Already on latest."
+    # Warn if data was created with different code version
+    if [[ "$local_ver" != "none" && "$local_ver" != "$code_ver" ]]; then
+        echo ""
+        echo "Warning: Data created with TERCES-$local_ver, code is TERCES-$code_ver"
+        echo "Consider: decrypt with old version, re-encrypt with new."
+    fi
+
+    if [[ "$code_ver" == "$new_ver" ]]; then
+        echo ""
+        echo "Code is latest. No update needed."
         rm -rf "$tmp_dir"
+        echo "Cleaned up tmp dir."
         exit 0
     fi
 
     new_dir="./TERCES-$new_ver"
     mv "$tmp_dir" "$new_dir"
 
+    echo ""
     echo "Installed: $new_dir"
-    echo "Data in .d/ stays here. cd $new_dir"
+    echo "Data in .d/ stays here."
+    echo "To migrate: decrypt here, cd $new_dir, re-encrypt."
     exit 0
 }
 
