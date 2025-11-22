@@ -12,7 +12,7 @@ from gnilux import (
 
 _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
 
-auth = U2FKey(mappings_file=CFG["mappings_file"])
+auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"])
 
 # --- DECRYPT FLOW ---
 if auth.authenticate():
