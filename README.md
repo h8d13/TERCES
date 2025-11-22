@@ -4,9 +4,11 @@ FIDO2 hardware key symetric manager. Interfaces directly with `CTAP2` protocol i
 
 Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES-256-GCM`.
 
+In case your distro doesn't package directly:
+
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
 
-> Helps you integrate with system + generate initial mappings.
+> Helps you integrate with system.
 
 ## Usage 🤫
 
@@ -19,7 +21,6 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 ./terces encrypt    # Store secret (prompts: name, secret, optional description)
 ./terces decrypt    # Retrieve secret (prompts: name)
 ./terces reset      # Deletes all locally stored keys
-./terces portable   # Usage on portable (import/export) Set rp_id in config or same hostnames
 ```
 
 >[!TIP]
@@ -37,3 +38,29 @@ You can use:
 ./terces update    # Clones fresh copy to different folder
 ```
 Then re-enroll manually to upgrade/migrate.
+
+---
+
+### Portable installs
+
+For use across multiple machines, set a fixed `rp_id` in `terces.cfg` **before** setup:
+
+```bash
+# Generate unique rp_id
+python3 -c "import uuid; print(f'pam://{str(uuid.uuid4())[:8]}')"
+```
+
+```json
+{"mappings_file": "/etc/u2f_mappings", "rp_id": "pam://a1b2c3d4"}
+```
+
+Then:
+```bash
+sudo ./terces setup           # Registers key with your rp_id
+./terces portable export      # Encrypts mappings file
+# Copy whole TERCES folder to USB
+
+# On new machine:
+./terces portable import | sudo tee /etc/u2f_mappings
+./terces unlock               # Works - same rp_id, same key
+```

@@ -23,14 +23,11 @@ make install
 cd /
 rm -rf "$BUILD_DIR"
 
-# ---- U2F key setup ----
-# can use .config xdg for more control 
-touch /etc/u2f_mappings
-pamu2fcfg -u "$SUDO_USER" | tee -a /etc/u2f_mappings
-chmod 600 /etc/u2f_mappings
+
 
 echo "pam-u2f installation complete."
-echo "Now edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."
+echo "Edit the .cfg then sudo ./terces setup"
+echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."
 
 ### Passwordless sudo
 # edit /etc/pam.d/system-auth # tested on open-rc 
