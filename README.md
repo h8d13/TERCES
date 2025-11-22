@@ -67,6 +67,21 @@ Then re-enroll manually to upgrade/migrate.
 
 ---
 
+## Already setup on one machine
+
+>In case you have already set it up on machine using default config:
+
+You can still just export/import the original file which contains `rp_id`:
+> By default if it was not specified it uses the hostname of the machine that you first ran this on. 
+
+```bash
+./terces portable export
+
+# Copy TERCES folder to new PC, then:
+./terces portable import | sudo tee /etc/u2f_mappings
+./terces unlock  # verify it works
+```
+
 ### Portable installs
 
 For use across multiple machines, set a fixed `rp_id` in `terces.cfg` **before** setup:
@@ -92,17 +107,4 @@ sudo ./terces setup           # Registers key with your rp_id
 # On new machine:
 ./terces portable import | sudo tee /etc/u2f_mappings
 ./terces unlock               # Works - same rp_id, same key
-```
-
-## Already setup on one machine
-
->In case you have already set it up on machine using default config:
-
-You can still just export/import the original file which contains `rp_id`:
-```bash
-./terces portable export
-
-# Copy TERCES folder to new PC, then:
-./terces portable import | sudo tee /etc/u2f_mappings
-./terces unlock  # verify it works
 ```
