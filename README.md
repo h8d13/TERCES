@@ -12,7 +12,11 @@ In case your distro doesn't package directly:
 
 `sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
 
-**Useful:** Thanks to Olastor:
+---
+
+## Understanding your FIDO Hardware:
+
+**Useful:** Thanks to Olastor +(my additions):
 
 -  `fido2-token -L`
 > List available devices.
