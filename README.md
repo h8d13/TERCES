@@ -14,7 +14,6 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 
 ```bash
 ./terces version   # Check for remote hash
-./terces update    # Clones fresh copy to different folder
 ./terces unlock    # Test auth
 ./terces encrypt   # Store secret (prompts: name, secret, optional description)
 ./terces decrypt   # Retrieve secret (prompts: name)
@@ -29,3 +28,9 @@ Encrypts/Decrypts secrets using your security key's `hmac-secret` extension `AES
 
 *Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
 Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
+
+You can tho use:
+```
+./terces update    # Clones fresh copy to different folder
+```
+Then re-enroll manually.
