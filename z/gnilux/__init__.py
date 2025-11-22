@@ -1,4 +1,5 @@
 from .admin import (
+    VERSION,
     uid,
     username,
     is_elevated,
@@ -17,6 +18,7 @@ from .handlers import (
 from .chapo import U2FKey
 
 __all__ = [
+    "VERSION",
     "U2FKey",
     "uid",
     "username",

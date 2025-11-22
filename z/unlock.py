@@ -1,4 +1,5 @@
 from gnilux import (
+    VERSION,
     U2FKey,
     uid,
     is_elevated,
@@ -8,6 +9,7 @@ from gnilux import (
     _debug,
 )
 
+_debug(f"TERCES-{VERSION}") 
 _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
 
 auth = U2FKey(mappings_file='/etc/u2f_mappings', use_pin=True)

@@ -17,21 +17,27 @@ VERSION_FILE="VERSION"
 }
 
 [[ "$1" == "update" ]] && {
-    # Read current version, increment for new install
     cur_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
-    new_ver=$(printf "%04d" $((10#$cur_ver + 1)))
-    new_dir="../TERCES-$new_ver"
+
+    # Clone to temp, read new VERSION from repo
+    tmp_dir=$(mktemp -d)
+    git clone --depth 1 "$REPO" "$tmp_dir" 2>/dev/null || { echo "Clone failed"; rm -rf "$tmp_dir"; exit 1; }
+    new_ver=$(cat "$tmp_dir/$VERSION_FILE" 2>/dev/null || echo "unknown")
 
     echo "Current: TERCES-$cur_ver"
-    echo "Cloning fresh copy to: $new_dir"
+    echo "Latest:  TERCES-$new_ver"
 
-    git clone --depth 1 "$REPO" "$new_dir" || { echo "Clone failed"; exit 1; }
-    echo "$new_ver" > "$new_dir/$VERSION_FILE"
+    if [[ "$cur_ver" == "$new_ver" ]]; then
+        echo "Already on latest version."
+        rm -rf "$tmp_dir"
+        exit 0
+    fi
 
-    echo ""
-    echo "Done! New version at: $new_dir"
-    echo "Your current data in .d/ stays here untouched."
-    echo "cd $new_dir && ./terces version"
+    new_dir="./TERCES-$new_ver"
+    mv "$tmp_dir" "$new_dir"
+
+    echo "Installed: $new_dir"
+    echo "Data in .d/ stays here. cd $new_dir"
     exit 0
 }
 
