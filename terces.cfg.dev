@@ -22,6 +22,6 @@
 
 // debug: true = verbose output from pamu2fcfg
 
-// mapping can be placed peruser `~/.config/keys/JohnDoe/u2f_mappings` or glabally in `/etc`
+// mapping can be placed peruser `~/.config/keys/JohnDoe/u2f_mappings` or globally in `/etc`
 // mappings format: username:keyhandle,pubkey,es256,+presence
 // username is cosmetic - doesn't affect authentication
