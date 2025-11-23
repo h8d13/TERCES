@@ -22,7 +22,7 @@ Set-up on arch:
 ## Understanding your FIDO Hardware:
 
 ```bash
-./terces list            # List devices
+./terces list           # List devices
 ./terces info <term>    # Example "algo"
 ```
 
