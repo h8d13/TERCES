@@ -14,3 +14,5 @@ Script in repo builds `pam-u2f` from source, generates **system-wide** mappings,
 > This is for systems that do not package `pam-u2f` directly. And builds necessary `.so` files in the expected directory.
 
 This script helps setup on Arch based distro but packages can be adapted for any by changing pkg man definitions.
+
+Inside the setup script you will find all instructions needed to integrate fully to your system for it to unlock **sudo, login screen, and display manager**. 
