@@ -1,7 +1,6 @@
 # KEKeys - FIDO2 on Open-rc/Other init systems
 
-> Thought it was sad to see most of documentation for Fido2 being only on systemd distros.
-So I just stole a bit from Gentoo wiki and played around to find what works and doesn't through `pam.d`.
+`KEKeys` is a guide for FIDO2 on Open-rc/Other init systems. Thought it was sad to see most of documentation for Fido2 being only on systemd distros. So I just stole a bit from Gentoo wiki and played around to find what works and doesn't through `pam.d`.
 
 This still unfortunatly doesn't provide as strong inegration as `systemd-cryptenroll` (for FDE unlock) but perhaps we can change that.
 
