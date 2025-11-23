@@ -119,6 +119,7 @@ Generate SSH keys backed by your security key. Requires terces auth before key g
 ```
 
 Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `ssh:<name>`.
+
 Can find more info [GITUTILS](./.github/GITUTILS.md)
 
 >[!NOTE]
