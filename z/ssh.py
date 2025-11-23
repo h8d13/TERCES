@@ -7,6 +7,8 @@ from gnilux import (
     CFG,
     U2FKey,
     username,
+    uid,
+    is_elevated,
     _success,
     _error,
     _debug,
@@ -53,6 +55,10 @@ def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE)
 
     if resident:
         cmd.extend(["-O", "resident"])
+
+    # Run as original user if elevated
+    if is_elevated(uid):
+        cmd = ["sudo", "-u", username] + cmd
 
     _debug(f"Running: {' '.join(cmd)}")
 
