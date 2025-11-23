@@ -116,7 +116,7 @@ Generate SSH keys backed by your security key. Requires terces auth before key g
 ```bash
 ./terces ssh <name>            # Generate resident ed25519-sk key
 ./terces ssh <name> --no-res   # Non-resident (stored locally only)
- ./terces ssh test gitlab.com  # Test directly
+./terces ssh test gitlab.com   # Test directly (with your provider)
 ```
 
 Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `ssh:<name>`.
