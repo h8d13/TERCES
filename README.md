@@ -3,9 +3,9 @@
 <img align="left" src="./KEKeys/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
 <img align="left" src="./KEKeys/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
 
-FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol locally in Python.
+FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python.
 
-Encrypts/Decrypts secrets using your security key's `hmac-secret` extension using `AES-256-GCM`.
+Encrypts/Decrypts secrets using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others.
 
 <br clear="left">
 
@@ -14,6 +14,8 @@ In case your distro doesn't package directly:
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
 
 > Helps you integrate with system even if not packaged by your distro, if it is:
+
+Set-up on arch: 
 
 `sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
 
