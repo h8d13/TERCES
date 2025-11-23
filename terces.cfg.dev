@@ -10,7 +10,8 @@
 
 
 // # rp_id: Relying party ID. null = pam://hostname (not portable)
-// #        Set fixed value for portability: "pam://my-id"
+// # when null it defaults to hostname
+// # set fixed value for portability: "pam://my-id"
 
 // # key_type: COSE algorithm - "ES256" (default), "EDDSA", or "RS256"
 
