@@ -231,7 +231,7 @@ class U2FKey:
         """
         salt = self.load_key_handle()
         secret_id = hashlib.sha256((salt + name).encode()).hexdigest()[:16]
-        return f"{self.secrets_dir}/{secret_id}.enc"
+        return f"{self.secrets_dir}/{secret_id}.trcs"
 
     def encrypt_secret(self, name: str, plaintext: str | bytes, description: str = "") -> str:
         """Encrypt a secret using salted name-derived filename"""

@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from gnilux import CFG, VERSION, _success
 
 DATA_DIR = f".d/terces-{VERSION}"
-BOOTSTRAP_FILE = f"{DATA_DIR}/.mappings.enc"
+BOOTSTRAP_FILE = f"{DATA_DIR}/.mappings.trcs"
 
 def derive_key(pin: bytes, salt: bytes) -> bytes:
     kdf = Scrypt(salt=salt, length=32, n=2**14, r=8, p=1)
