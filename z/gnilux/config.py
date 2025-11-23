@@ -1,4 +1,6 @@
 import json
+from json import JSONDecodeError
+
 from pathlib import Path
 
 _cfg_file = Path(__file__).parent.parent.parent / "terces.cfg"
@@ -6,9 +8,15 @@ _cfg_file = Path(__file__).parent.parent.parent / "terces.cfg"
 def load_config() -> dict:
     """Load config from terces.cfg, fallback to defaults"""
     defaults = {"mappings_file": "/etc/u2f_mappings", "rp_id": None}
-    if _cfg_file.exists():
-        with open(_cfg_file) as f:
-            return {**defaults, **json.load(f)}
+    try:
+        if _cfg_file.exists():
+            with open(_cfg_file) as f:
+                return {**defaults, **json.load(f)}
+        else:
+            print('Config file not found.')
+    except JSONDecodeError:
+        print("Config file borken")
+
     return defaults
 
 CFG = load_config()

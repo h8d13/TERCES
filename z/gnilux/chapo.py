@@ -247,7 +247,7 @@ class U2FKey:
         return filename
 
     def decrypt_secret(self, name: str) -> str | None:
-        """Decrypt a secret using salted name-derived filename"""
+        """Decrypt a sehandlescret using salted name-derived filename"""
         filename = self._derive_filename(name)
 
         if not os.path.exists(filename):
