@@ -1,7 +1,7 @@
 # Terces
 
-<img align="left" src="./.github/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
-<img align="left" src="./.github/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
+<img align="left" src="./.github/assets/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
+<img align="left" src="./.github/assets/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
 
 FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to passwords is 63 chars. 
 
@@ -119,9 +119,10 @@ Generate SSH keys backed by your security key. Requires terces auth before key g
 ```
 
 Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `ssh:<name>`.
+Can find more info [GITUTILS](./.github/GITUTILS.md)
 
 >[!NOTE]
-> Uses OpenSSH's native FIDO2 support (`ssh-keygen -t ed25519-sk`). Your key must support the `eddsa` algorithm.
+> Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
 
 ### File Encryption
 
