@@ -3,7 +3,8 @@ from json import JSONDecodeError
 
 from pathlib import Path
 
-_cfg_file = Path(__file__).parent.parent.parent / "terces.cfg"
+dev_mode = ""
+_cfg_file = Path(__file__).parent.parent.parent / f"terces.cfg{dev_mode}"
 
 def load_config() -> dict:
     """Load config from terces.cfg, fallback to defaults"""
