@@ -6,12 +6,13 @@ from pathlib import Path
 from gnilux import (
     CFG,
     U2FKey,
+    username,
     _success,
     _error,
     _debug,
 )
 
-SSH_DIR = Path.home() / ".ssh"
+SSH_DIR = Path(f"~{username}/.ssh").expanduser()
 DEFAULT_KEY_TYPE = "ed25519-sk"
 
 
@@ -68,7 +69,7 @@ def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE)
             auth.encrypt_secret(
                 name=f"ssh:{name}",
                 plaintext=pubkey,
-                description=f"SSH public key - {key_path}"
+                description=f"ssh-key:{name}"
             )
         return True
     else:
