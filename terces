@@ -74,5 +74,5 @@ get_local_ver() {
     exit 0
 }
 
-python -B z/"$1".py
+python -B z/"$1".py "${@:2}"
 

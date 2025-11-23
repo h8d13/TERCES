@@ -1,7 +1,7 @@
 # Terces
 
-<img align="left" src="./KEKeys/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
-<img align="left" src="./KEKeys/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
+<img align="left" src="./.github/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
+<img align="left" src="./.github/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
 
 FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to passwords is 63 chars. 
 
@@ -21,29 +21,10 @@ Set-up on arch:
 
 ## Understanding your FIDO Hardware:
 
-**Useful:** Thanks to Olastor +(my additions):
-
--  `fido2-token -L`
-> List available devices.
-
-- `fido2-token -I /dev/hidrawX`
-- `fido2-token -I /dev/hidraw0 | grep -E "extension|algorithms"` > See key capabilities
-
-The full output provides much useful info: 
-
-| Property        | Value               | Notes                                           |
-|-----------------|---------------------|-------------------------------------------------|
-| hmac-secret     | supported           | Required for TERCES - derives encryption keys   |
-| algorithms      | es256, eddsa, es384 | Can use eddsa in config if you prefer           |
-| rk              | supported           | Resident keys work - "resident": true is viable |
-| remaining rk(s) | 99                  | Can store X more discoverable credentials       |
-| credProtect     | supported           | Credential protection levels available          |
-| pin retries     | 8                   | 8 PIN attempts before lockout                   |
-| minpinlen       | 4                   | Minimum PIN is 4 chars                          |
-| clientPin       | supported           | PIN is available                                |
-| FIDO_2_1        | supported           | Latest FIDO2 spec                               |
-
-Depending on the key model/age.
+```bash
+./terces list            # List devices
+ ./terces info <term>    # Example "algo"
+```
 
 ## Usage 🤫
 
@@ -51,8 +32,6 @@ Depending on the key model/age.
 > Find mapping path in `terces.cfg`
 
 ```bash
-./terces list
-./terces info
 ./terces setup      # Generate mappings file
 ./terces unlock     # Test auth
 ./terces encrypt    # Store secret (prompts: name, secret, optional description)

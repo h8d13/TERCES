@@ -16,7 +16,8 @@ from .handlers import (
 )
 
 from .config import CFG
-from .chapo import U2FKey, info, list_devices
+from .chapo import U2FKey
+from .keytype import info, list_devices, get_device_info, format_info, ALG_NAMES
 
 __all__ = [
     "VERSION",
@@ -24,6 +25,9 @@ __all__ = [
     "U2FKey",
     "info",
     "list_devices",
+    "get_device_info",
+    "format_info",
+    "ALG_NAMES",
     "uid",
     "username",
     "is_elevated",
