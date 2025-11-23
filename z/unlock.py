@@ -13,7 +13,7 @@ from gnilux import (
 _debug(f"TERCES-{VERSION}")
 _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
 
-auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"])
+auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"], device_index=CFG["device_index"])
 
 _debug(f'{auth.check_perms()}')
 

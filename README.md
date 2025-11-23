@@ -3,7 +3,7 @@
 <img align="left" src="./KEKeys/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
 <img align="left" src="./KEKeys/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
 
-FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others.
+FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to passwords is 63 chars. 
 
 <br clear="left">
 
@@ -51,6 +51,8 @@ Depending on the key model/age.
 > Find mapping path in `terces.cfg`
 
 ```bash
+./terces list
+./terces info
 ./terces setup      # Generate mappings file
 ./terces unlock     # Test auth
 ./terces encrypt    # Store secret (prompts: name, secret, optional description)

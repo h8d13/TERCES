@@ -10,14 +10,126 @@ import base64
 import getpass
 import socket
 import os
+import re
 
 from .admin import _random, _suuid, VERSION
 from .handlers import _error, _nf_warn, _debug, _success
 
+
+def list_devices() -> list[dict]:
+    """
+    List available FIDO2 devices (equivalent to fido2-token -L).
+
+    Returns:
+        List of device dicts with index and path
+    """
+    devices = list(CtapHidDevice.list_devices())
+
+    if not devices:
+        _nf_warn("No FIDO2 devices found")
+        return []
+
+    results = []
+    for i, dev in enumerate(devices):
+        d = {"index": i, "path": str(dev.descriptor.path)}
+        results.append(d)
+        print(f"{i}: {d['path']}")
+
+    return results
+
+
+def info(filter_pattern: str | None = None, device_index: int | None = None) -> dict | list[dict]:
+    """
+    Get FIDO2 device info (equivalent to fido2-token -L and -I).
+
+    Args:
+        filter_pattern: Regex pattern to filter output (e.g. "extension|algorithm")
+        device_index: Specific device index to query (None = all devices)
+
+    Returns:
+        Device info dict or list of dicts for multiple devices
+    """
+    devices = list(CtapHidDevice.list_devices())
+
+    if not devices:
+        _nf_warn("No FIDO2 devices found")
+        return []
+
+    def get_device_info(dev, idx: int) -> dict:
+        ctap = Ctap2(dev)
+        info = ctap.info
+
+        # Get PIN retries if supported
+        pin_retries = None
+        if info.options.get("clientPin"):
+            try:
+                client_pin = ClientPin(ctap)
+                pin_retries = client_pin.get_pin_retries()[0]
+            except Exception:
+                pass
+
+        # Build info dict
+        device_info = {
+            "device": idx,
+            "path": str(dev.descriptor.path),
+            "versions": info.versions,
+            "extensions": list(info.extensions) if info.extensions else [],
+            "algorithms": [alg.get(3, alg) for alg in info.algorithms] if info.algorithms else [],
+            "options": dict(info.options) if info.options else {},
+            "max_msg_size": info.max_msg_size,
+            "pin_retries": pin_retries,
+            "max_creds_in_list": info.max_creds_in_list,
+            "max_cred_id_len": info.max_cred_id_length,
+            "remaining_rks": info.remaining_disc_creds,
+            "min_pin_length": info.min_pin_length,
+        }
+        return device_info
+
+    def format_info(d: dict) -> str:
+        """Format device info for display"""
+        lines = [
+            f"Device {d['device']}: {d['path']}",
+            f"  versions: {', '.join(d['versions'])}",
+            f"  extensions: {', '.join(d['extensions'])}",
+            f"  algorithms: {', '.join(str(a) for a in d['algorithms'])}",
+            f"  options:",
+        ]
+        for k, v in d['options'].items():
+            lines.append(f"    {k}: {'supported' if v else 'not supported'}")
+        lines.extend([
+            f"  remaining rk(s): {d['remaining_rks']}",
+            f"  pin retries: {d['pin_retries']}",
+            f"  min pin length: {d['min_pin_length']}",
+        ])
+        return '\n'.join(lines)
+
+    # Collect info
+    if device_index is not None:
+        if device_index >= len(devices):
+            _error(f"Device index {device_index} out of range (found {len(devices)} devices)")
+            return {}
+        results = [get_device_info(devices[device_index], device_index)]
+    else:
+        results = [get_device_info(dev, i) for i, dev in enumerate(devices)]
+
+    # Display
+    for d in results:
+        output = format_info(d)
+        if filter_pattern:
+            filtered = [l for l in output.split('\n') if re.search(filter_pattern, l, re.I)]
+            if filtered:
+                print('\n'.join(filtered))
+        else:
+            print(output)
+        print()
+
+    return results[0] if len(results) == 1 else results
+
 class U2FKey:
-    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, secrets_dir: str = f".d/terces-{VERSION}"):
+    def __init__(self, mappings_file: str | None = None, rp_id: str | None = None, device_index: int | None = None, secrets_dir: str = f".d/terces-{VERSION}"):
         self.mappings_file: str = mappings_file or '/etc/u2f_mappings'
         self.rp_id: str = rp_id or f"pam://{socket.gethostname()}"
+        self.device_index: int | None = device_index
         self.secrets_dir: str = secrets_dir
         self.secrets_index: str = f"{self.secrets_dir}/_tm.json"
 
@@ -37,12 +149,23 @@ class U2FKey:
 
     def get_device(self):
         devices = list(CtapHidDevice.list_devices())
+        
         if not devices:
             _nf_warn("No key: Press ENTER to retry or CTRL+C to cancel.")
             input()
-            return self.get_device()  # Just go back to top
-        return devices[0] # Currently only support first key found
-    
+            return self.get_device()
+
+        if self.device_index is not None:
+            try:
+                if self.device_index >= len(devices):
+                    _error(f"Device index {self.device_index} out of range (found {len(devices)} devices)")
+                    raise IndexError(f"Device index {self.device_index} not found")
+                return devices[self.device_index]
+            except TypeError:
+                # use raw representation to clearly show user the problem with cfg
+                _error(f'device_index: {self.device_index!r} - should be a number not string (no quotes for int type)')
+        return devices[0]
+
     def load_key_handle(self) -> str:
         try:
             with open(self.mappings_file) as f:

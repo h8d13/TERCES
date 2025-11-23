@@ -16,12 +16,14 @@ from .handlers import (
 )
 
 from .config import CFG
-from .chapo import U2FKey
+from .chapo import U2FKey, info, list_devices
 
 __all__ = [
     "VERSION",
     "CFG",
     "U2FKey",
+    "info",
+    "list_devices",
     "uid",
     "username",
     "is_elevated",

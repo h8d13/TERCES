@@ -1,4 +1,5 @@
 {
+  "device_index": null,
   "mappings_file": "/etc/u2f_mappings",
   "rp_id": "pam://hostname",
   "key_type": null,
@@ -8,6 +9,7 @@
   "debug": false
 }
 
+// # device_index": 0 default incrment by 1, etc
 
 // # rp_id: Relying party ID. null = pam://hostname (not portable)
 // # when null it defaults to hostname
