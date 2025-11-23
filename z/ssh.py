@@ -83,11 +83,38 @@ def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE)
         return False
 
 
+def test(provider: str):
+    """Test which SSH keys are offered to a provider"""
+    # Add git@ prefix if not present
+    if not provider.startswith("git@"):
+        provider = f"git@{provider}"
+
+    result = subprocess.run(
+        ["ssh", "-vT", provider],
+        capture_output=True,
+        text=True
+    )
+
+    # Grep for Offering lines (in stderr)
+    for line in result.stderr.split('\n'):
+        if "Offering" in line:
+            print(line.strip())
+
+
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: ./terces ssh <name> [--no-res]")
+        print("Usage: ./terces ssh <name> [--no-res] | test <provider>")
         sys.exit(1)
 
-    name = sys.argv[1]
-    resident = "--no-res" not in sys.argv
-    generate(name, resident=resident)
+    cmd = sys.argv[1]
+
+    if cmd == "test":
+        if len(sys.argv) < 3:
+            _error("Missing provider")
+            print("Usage: ./terces ssh test github.com")
+            sys.exit(1)
+        test(sys.argv[2])
+    else:
+        name = cmd
+        resident = "--no-res" not in sys.argv
+        generate(name, resident=resident)
