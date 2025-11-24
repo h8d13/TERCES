@@ -2,19 +2,16 @@
 REPO="https://github.com/h8d13/TERCES"
 VERSION_FILE="version"
 
+[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|vault|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|gen|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
+
+[[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
+
 # Get local version from .d/terces-XXXX directory name
 get_local_ver() {
     local dir
     dir=$(find ".d" -maxdepth 1 -type d -name 'terces-*' 2>/dev/null | head -1)
     [[ -n "$dir" ]] && basename "$dir" | sed 's/terces-//' || echo "none"
 }
-
-[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|vault|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|gen|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
-
-[[ "$1" == "setup" ]] && { python -B z/setup.py; exit 0; }
-[[ "$1" == "portable" ]] && { python -B z/portable.py "$2"; exit 0; }
-
-[[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
 
 [[ "$1" == "version" ]] && {
     local_ver=$(get_local_ver)
@@ -73,8 +70,6 @@ get_local_ver() {
     echo "To migrate: decrypt here, cd $new_dir, re-encrypt."
     exit 0
 }
-
-[[ "$1" == "vault" ]] && { python -B z/vault.py; exit 0; }
 
 python -B z/"$1".py "${@:2}"
 
