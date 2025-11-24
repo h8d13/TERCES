@@ -20,4 +20,59 @@ Script in repo builds `pam-u2f` from source, generates **system-wide** mappings,
 
 This script helps setup on Arch based distro but packages can be adapted for any by changing pkg man definitions.
 
-Inside the setup script you will find all instructions needed to integrate fully to your system for it to unlock **sudo, login screen, and display manager**. 
+Inside the setup script you will find all instructions needed to integrate fully to your system for it to unlock **sudo, login screen, and display manager**.
+
+---
+
+## Memory Hardening (OpenRC)
+
+Terces derived keys briefly exist in RAM during operations. For truly tin-foil paranoid setups:
+Assumes you are already on a FDE system. 
+
+### Compressed zram swap with zramen
+
+```bash
+# Install
+sudo pacman -S zramen zramen-openrc
+
+# Configure /etc/conf.d/zramen
+size="2G"
+algo="zstd"
+
+# Enable and start
+sudo rc-update add zramen default
+sudo rc-service zramen start
+```
+
+### Encrypted zram (dm-crypt wrapper)
+
+zramen doesn't encrypt, wrap manually if needed:
+
+```bash
+# After zramen creates /dev/zram0
+sudo swapoff /dev/zram0
+sudo cryptsetup open --type plain /dev/zram0 zram-crypt --key-file /dev/urandom
+sudo mkswap /dev/mapper/zram-crypt
+sudo swapon -p 100 /dev/mapper/zram-crypt
+```
+
+>[!NOTE]
+> On FDE systems with no disk swap, encrypted zram is overkill - RAM is volatile and never persists.
+
+### Disable core dumps
+
+Add to `/etc/security/limits.conf`
+
+```
+* hard core 0
+```
+
+### Verify no disk swap
+
+```bash
+# Should only show zram, no /dev/sdX or files
+cat /proc/swaps
+```
+
+>[!TIP]
+> With zram + no disk swap, your derived keys never touch persistent storage even under memory pressure. 
