@@ -37,11 +37,11 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 
 ```bash
 ./terces setup              # Generate mappings file
-./terces test <type> <size> # Test files using openssl sha256sum and terces 
-./terces unlock             # Test auth
+./terces test <type> <opt> # Test files using openssl sha256sum and terces 
+./terces unlock             # Test auth on .cfg
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
-./terces gen [len] [name]   # Generate password (optional: length, store as name)
+./terces gen <x> <name>     # Generate password (optional: length, store as name)
 ./terces vault              # List stored secrets in vault
 ./terces delete <name>      # Delete a secret from vault
 ./terces reset              # Deletes all locally stored keys
