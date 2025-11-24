@@ -55,7 +55,8 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > If you're wanting to use Terces and already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
 > Do not run setup again as you can keep your exisitng mappings if needed. 
 
-**Names are up to you to remember.** A key needs to be retrieved using it's name which is **never actually stored.**
+- **Names are up to you to remember.** A key needs to be retrieved using it's name which is **never actually stored.**
+- **Delete files** - After encryption, originals remain. Remove them yourself when ready. 
 
 ## Updates
 
@@ -91,7 +92,7 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 
 ### File/Folder Encryption
 
-Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys.
+Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
 
 ```bash
 ./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
@@ -119,4 +120,19 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys.
 >[!NOTE]
 > Sender doesn't need FIDO2. Only recipient can decrypt.
 
+## Terces install
+
+- Running from Python in isolated venv
+
+We have a helper script `zpya` that downloads Python deps from pip in `.venv`
+
+- Installing *somewhere*
+
+You can place `TERCES/` anywhere on the system or removable media
+
+Then create a symlink either `ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
+
+Or use an alias like: `alias terces='/path/to/TERCES/terces'` TO use only in shell env. 
+
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices.
 ---
