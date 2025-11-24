@@ -81,7 +81,8 @@ You can use:
 ./terces version   # Check for remote hash
 ./terces update    # Clones fresh copy to different folder
 ```
-Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside dir `.d/terces-0003`
+>[!TIP]
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside dir `.d/terces-0003`
 
 ---
 
