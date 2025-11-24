@@ -78,7 +78,8 @@ Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as 
 
 ---
 
-## Advanced Use Cases
+<details>
+<summary><b>Advanced Use Cases</b></summary>
 
 ### FIDO2-backed SSH Keys
 
@@ -120,6 +121,8 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces unshare <file.shrd>          # Decrypt with your FIDO2
 ./terces unshare <file.shrd> <label>  # Decrypt with labeled keypair
 ```
+
+</details>
 
 ## Installing
 
