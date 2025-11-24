@@ -15,7 +15,7 @@ from .handlers import (
     _debug,
 )
 
-from .safe_path import is_venv, is_python
+from .safe_path import is_venv, is_python, is_safe_path
 
 from .config import CFG
 from .chapo import U2FKey
@@ -35,6 +35,7 @@ __all__ = [
     "is_elevated",
     "is_venv",
     "is_python",
+    "is_safe_path",
     "who_dat",
     "_random",
     "_suuid",

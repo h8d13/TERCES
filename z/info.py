@@ -5,9 +5,12 @@ from gnilux import (
     info,
     is_venv,
     is_python,
+    is_safe_path,
+    username,
 )
 
 print(f"venv: {is_venv}")
 print(f"python: {is_python}")
+print(f"user: {username} (safe: {is_safe_path(username)})")
 filter_pattern = sys.argv[1] if len(sys.argv) > 1 else None
 info(filter_pattern=filter_pattern, device_index=CFG["device_index"])
