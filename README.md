@@ -136,6 +136,7 @@ You can place `TERCES/` anywhere on the system or removable media
 Then create a symlink either:
 
 `ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
-`alias terces='/path/to/TERCES/terces'` To use only in shell env. 
+
+Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
 
 ---
