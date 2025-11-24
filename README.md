@@ -82,12 +82,12 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 >[!NOTE]
 > Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
 
-### File Encryption
+### File/Folder Encryption
 
-Encrypt/decrypt files using FIDO2 hmac-secret derived keys.
+Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys.
 
 ```bash
-./terces file enc /path/to/file       # Creates file.trcs
+./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
 ./terces file dec /path/to/file.trcs  # Restores original
 ```
 

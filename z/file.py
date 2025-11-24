@@ -1,5 +1,7 @@
-# file.py - FIDO2-backed file encryption
+# file.py - FIDO2-backed file/folder encryption
 import sys
+import io
+import tarfile
 from pathlib import Path
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -13,15 +15,15 @@ from gnilux import (
 
 
 def encrypt_file(file_path: str):
-    """Encrypt a file using FIDO2 hmac-secret derived key"""
+    """Encrypt a file or folder using FIDO2 hmac-secret derived key"""
     path = Path(file_path)
 
     if not path.exists():
-        _error(f"File not found: {path}")
+        _error(f"Not found: {path}")
         return False
 
     if path.suffix == ".trcs":
-        _error("File already encrypted (.trcs)")
+        _error("Already encrypted (.trcs)")
         return False
 
     auth = U2FKey(
@@ -36,22 +38,38 @@ def encrypt_file(file_path: str):
 
     _success("Auth OK")
 
-    # Use key_handle + filename as salt (same security model as secrets)
+    is_dir = path.is_dir()
+
+    if is_dir:
+        # Tar the folder
+        buf = io.BytesIO()
+        with tarfile.open(fileobj=buf, mode='w:gz') as tar:
+            tar.add(path, arcname=path.name)
+        plaintext = buf.getvalue()
+        out_path = Path(f"{path}.tar.trcs")
+        salt_name = path.name + ".tar"
+    else:
+        plaintext = path.read_bytes()
+        out_path = Path(f"{path}.trcs")
+        salt_name = path.name
+
+    # Use key_handle + filename as salt
     key_handle = auth.load_key_handle()
-    salt = (key_handle + path.name).encode()
+    salt = (key_handle + salt_name).encode()
     key = auth.get_terces(salt)
 
-    plaintext = path.read_bytes()
     nonce = _random(12)
     cipher = AESGCM(key)
     ciphertext = cipher.encrypt(nonce, plaintext, None)
 
-    out_path = Path(f"{path}.trcs")
     out_path.write_bytes(nonce + ciphertext)
 
     _success(f"Encrypted: {out_path}")
     print(f"Original size: {len(plaintext)} bytes")
-    print(f"You can now delete the original: rm '{path}'")
+    if is_dir:
+        print(f"You can now delete the folder: rm -r '{path}'")
+    else:
+        print(f"You can now delete the original: rm '{path}'")
     return True
 
 
@@ -95,10 +113,21 @@ def decrypt_file(file_path: str):
         _error("Decryption failed - wrong key or corrupted file")
         return False
 
-    out_path = path.with_suffix("")  # remove .trcs
-    out_path.write_bytes(plaintext)
+    # Check if it's a tar archive (gzip magic bytes: 1f 8b)
+    if plaintext[:2] == b'\x1f\x8b':
+        buf = io.BytesIO(plaintext)
+        with tarfile.open(fileobj=buf, mode='r:gz') as tar:
+            tar.extractall(path=path.parent)
+        # Get the folder name from tar
+        buf.seek(0)
+        with tarfile.open(fileobj=buf, mode='r:gz') as tar:
+            folder_name = tar.getnames()[0].split('/')[0]
+        _success(f"Extracted: {path.parent / folder_name}")
+    else:
+        out_path = path.with_suffix("")  # remove .trcs
+        out_path.write_bytes(plaintext)
+        _success(f"Decrypted: {out_path}")
 
-    _success(f"Decrypted: {out_path}")
     return True
 
 

@@ -16,8 +16,8 @@ Secrets:
   reset                   Delete all data
 
 Files:
-  file enc <path>         Encrypt file (.trcs)
-  file dec <path>         Decrypt file
+  file enc <path>         Encrypt file/folder (.trcs)
+  file dec <path>         Decrypt file/folder
 
 SSH:
   ssh <name>              Generate FIDO2-backed SSH key
