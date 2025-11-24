@@ -147,7 +147,7 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 Dell enterprise laptop (NVMe M.2 SSD):
 
 | Operation | Size | Speed |
-|-----------|------|-------|
+|:----------|:-----|:------|
 | **File Enc** | 10 GiB | 569 MiB/s |
 | **File Dec** | 10 GiB | 540 MiB/s |
 | **File Dec** | 2 GiB | 1295 MiB/s |
@@ -159,7 +159,7 @@ Dell enterprise laptop (NVMe M.2 SSD):
 Using 100 files of 20MiB each `/dev/urandom`
 
 | Compression | Tar | Enc | Dec |
-|---------------|-----|-----|-----|
+|:------------|:----|:----|:----|
 | `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
 | `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
 | `gzip` | 35.2s | 944 MiB/s | 1240 MiB/s |
