@@ -132,7 +132,8 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 
 ## Table examples
 
-Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD):
+Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD): 
+> You might have better hardware than I do 💻
 
 | Operation | File Size | Time | Speed |
 |-----------|-----------|------|-------|
