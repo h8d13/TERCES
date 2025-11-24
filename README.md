@@ -13,7 +13,7 @@ In case your distro doesn't package directly:
 
 > Helps you integrate with system even if not packaged by your distro, if it is:
 
-Set-up on arch: 
+Set-up on arch (which asumes base-devel git tar...): 
 
 `sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
 
@@ -48,7 +48,11 @@ Set-up on arch:
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
 > Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
 
-See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth. Can also see for multi-hosts installs [Portable](.github/PORTABLE.md)
+See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth.
+
+>[!IMPORTANT]
+> If you're wanting to use Terces and already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
+> Do not run setup again as you can keep your exisitng mappings if needed. 
 
 ## Updates
 
@@ -60,7 +64,7 @@ You can use:
 ./terces version   # Check for remote hash
 ./terces update    # Clones fresh copy to different folder
 ```
-Then re-enroll manually to upgrade/migrate.
+Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside dir `.d/terces-0003`
 
 ---
 
