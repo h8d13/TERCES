@@ -68,7 +68,7 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > Do not run setup again as you can keep your exisitng mappings if needed. 
 
 **Names are for you to remember.** A keys retrieved using it's name which is **never actually stored.**
-**Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
+**Delete files** - After encryption, originals remain. Remove them yourself **when ready.** We only print a reminder.
 
 ## Updates
 
