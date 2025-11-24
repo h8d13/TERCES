@@ -121,7 +121,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ```bash
 ./terces keypub <label>               # Export your public key (optional label)
 ./terces share <file> <pubkey>        # Encrypt for recipient (no need for FIDO2 key)
-./terces unshare <file.shrd>          # Decrypt from sender (optional label)
+./terces unshare <file.shrd>          # Decrypt from sender using FIDO2 key (optional label)
 ```
 </details>
 
@@ -155,9 +155,9 @@ Using 100 files of 20MiB each `/dev/urandom`
 | `none` | 1.2s | 757 MB/s | 970 MB/s | 
 
 ```bash
-terces test large 2048   # Single file
-terces test folder 50 20 # 50 files x 20MB
-terces test asym 2048    # Asymmetric
+./terces test large 2048   # Single file
+./terces test asym 2048    # Asymmetric
+./terces test folder 50 20 # 50 files x 20MB
 ```
 
 </details>
