@@ -150,8 +150,9 @@ Smaller files are faster due to reduced I/O overhead and better cache utilizatio
 
 Run your own benchmarks:
 ```bash
-./tests/large 2048   # 2GB symmetric test
-./tests/asym 2048    # 2GB asymmetric test
+./terces test <type> <size> # Test files using openssl sha256sum and terces 
+./terces test large 2048 
+# or asym instead of large
 ```
 
 </details>
