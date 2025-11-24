@@ -11,7 +11,7 @@ Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (G
 
 In case your distro doesn't package directly:
 
-- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version (say you are using open-rc for example).
+- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version for any init system.
 - And integrate to `pam.d` for system-login, login-manager, etc... Helps you integrate with system even if not packaged by your distro, if it is:
 
 Set-up on arch (which asumes base-devel git tar): 
