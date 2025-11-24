@@ -51,7 +51,7 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 ```bash
 ./terces unlock             # Test auth on .cfg
 ./terces gen <x> <name>     # Generate password (optional: length, store as name) 
-                # ^^^^ If name is left empty DO NOT save just generate
+                # ^^^^ Name is empty DO NOT save just generate
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
 ./terces vault              # List stored secrets in vault
