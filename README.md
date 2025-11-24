@@ -81,7 +81,7 @@ Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as 
 ## Advanced Use Cases
 
 <details>
-<summary><b>Extras</b></summary>
+<summary><b>Extras 🎁</b></summary>
 
 ### FIDO2-backed SSH Keys
 
@@ -96,8 +96,7 @@ Can find more info [GITUTILS](./.github/GITUTILS.md)
 
 Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function.
 
->[!NOTE]
-> Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
+**Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
 
 ### File/Folder Encryption
 
@@ -110,9 +109,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces file dec /path/to/file.trcs  # Restores original
 ```
 
->[!IMPORTANT]
-> Key is derived from `key_handle + filename`  Renaming `.trcs` files breaks decryption.
-> This also strips any old metadata as it only contains `ciphertext` + `nonce` and new file details.
+**Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.
 
 ### Sharing (Asymmetric)
 
