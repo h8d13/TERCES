@@ -68,6 +68,7 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > Do not run setup again as you can keep your exisitng mappings if needed. 
 
 **Names are for you to remember.** A keys retrieved using it's name which is **never actually stored.**
+**Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
 
 ## Updates
 
@@ -106,8 +107,6 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 ### File/Folder Encryption
 
 Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
-
-**Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
 
 ```bash
 ./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
