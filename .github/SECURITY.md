@@ -39,7 +39,7 @@ Still allows for sharing using asymetric modules or controlled sharing of keys.
 
 ---
 
-## Recovery Mechanisms Are a Security Risk
+## Recovery Mechanisms = Security Threat
 
 Every recovery option is an attack vector:
 
