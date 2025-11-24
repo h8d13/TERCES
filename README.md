@@ -80,7 +80,7 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > If you've already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
 > Do not run setup again as you can keep your exisitng mappings if needed. Or start fresh if desired should be an option in app of provider.
 
-- **Keynames are for you to remember.** using derived `name` and `key_handle` which is **never actually stored.**
+- **Keynames are up to you to remember.** derived `name` and `key_handle` which is **never actually stored.**
 - **Delete files** - After encryption, originals remain. Remove them **when ready.** Terces only print a reminder.
 
 ## Installing
