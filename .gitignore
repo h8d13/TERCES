@@ -2,3 +2,5 @@
 lol.jpg
 *.trcs
 *.shrd
+.venv/
+.ruff_cache/
