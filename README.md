@@ -127,8 +127,12 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ```
 </details>
 
+## Blazing fast
+
 <details>
 <summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
+
+## Table examples
 
 Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD):
 
@@ -139,6 +143,8 @@ Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD):
 | **Symmetric Dec** | 2 GiB | 1.6s | 1295 MB/s |
 | **Asymmetric Share** | 2 GiB | 1.9s | 1097 MB/s |
 | **Asymmetric Unshare** | 2 GiB | 1.6s | 1297 MB/s |
+
+### Run your own
 
 Smaller files are faster due to reduced I/O overhead and better cache utilization in `/tmp`.
 
