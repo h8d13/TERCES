@@ -40,6 +40,7 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 ```bash
 ./terces list           # List devices
 ./terces info <term>    # Example "algo", empty for full info
+./terces setup          # Generate mappings file (prompts if PIN is setup already)
 ./terces help           # Show all commands
 ```
 
@@ -48,7 +49,6 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 > Global mappings require sudo. Per-user mappings **DO NOT.**
 
 ```bash
-./terces setup              # Generate mappings file
 ./terces unlock             # Test auth on .cfg
 ./terces gen <x> <name>     # Generate password (optional: length, store as name) 
                 # ^^^^ If name is left empty DO NOT save just generate
