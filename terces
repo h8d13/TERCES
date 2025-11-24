@@ -2,9 +2,10 @@
 REPO="https://github.com/h8d13/TERCES"
 VERSION_FILE="version"
 
-[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|vault|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|gen|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
+[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|vault|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|gen|test|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
 
 [[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
+[[ "$1" == "test" ]] && { ./tests/test_"${2:-large}" "${@:3}"; exit $?; }
 
 # Get local version from .d/terces-XXXX directory name
 get_local_ver() {
