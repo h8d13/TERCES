@@ -12,7 +12,7 @@ from gnilux import (
     _error,
 )
 
-def unshare_file(file_path: str):
+def unshare_file(file_path: str, label: str = ""):
     """
     Decrypt file that was shared with you.
 
@@ -40,9 +40,9 @@ def unshare_file(file_path: str):
 
     _success("Auth OK")
 
-    # Salt = key_handle + domain separator (must match keypub.py)
+    # Salt = key_handle + domain separator + optional label (must match keypub.py)
     key_handle = auth.load_key_handle()
-    salt = (key_handle + "x25519").encode()
+    salt = (key_handle + "x25519" + label).encode()
     seed = auth.get_terces(salt)
     private_key = X25519PrivateKey.from_private_bytes(seed)
 
@@ -78,8 +78,9 @@ def unshare_file(file_path: str):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: ./terces unshare <file.shrd>")
+        print("Usage: ./terces unshare <file.shrd> [label]")
         sys.exit(1)
 
     file_path = sys.argv[1]
-    unshare_file(file_path)
+    label = sys.argv[2] if len(sys.argv) > 2 else ""
+    unshare_file(file_path, label)

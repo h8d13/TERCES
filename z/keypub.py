@@ -1,4 +1,5 @@
 # keypub.py - Export FIDO2-derived public key for asymmetric sharing
+import sys
 import base64
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey
 
@@ -9,7 +10,8 @@ from gnilux import (
     _error,
 )
 
-def export_pubkey():
+
+def export_pubkey(label: str = ""):
     """Derive X25519 keypair from FIDO2 and export public key"""
     auth = U2FKey(
         mappings_file=CFG["mappings_file"],
@@ -23,9 +25,9 @@ def export_pubkey():
 
     _success("Auth OK")
 
-    # Salt = key_handle + domain separator (unique per credential)
+    # Salt = key_handle + domain separator + optional label
     key_handle = auth.load_key_handle()
-    salt = (key_handle + "x25519").encode()
+    salt = (key_handle + "x25519" + label).encode()
     seed = auth.get_terces(salt)
 
     # Generate X25519 keypair from seed
@@ -41,4 +43,5 @@ def export_pubkey():
 
 
 if __name__ == "__main__":
-    export_pubkey()
+    label = sys.argv[1] if len(sys.argv) > 1 else ""
+    export_pubkey(label)
