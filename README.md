@@ -174,6 +174,7 @@ Then create a symlink either: Check paths: `echo $PATH`
 
 Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
 
+>[!NOTE]
 > Once this is setup you do not need the `./` before commands anymore. 
 
 ---
