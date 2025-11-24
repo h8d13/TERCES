@@ -88,4 +88,4 @@ cat /proc/swaps
 >[!TIP]
 > With zram + no disk swap, your derived keys never touch persistent storage even under memory pressure. 
 
-- Probably the coolest 20-50$ gadget there is (next to a good USB-C Nvme adapter). At first I didnt believe much in all encryption and similar subjects I wanted things to be functional. Then I realised with the little privacy left, it becomes a more fu
+Probably the coolest 20-50$ gadget there is (next to a good USB-C Nvme adapter). At first I didnt believe much in all encryption and similar subjects I wanted things to be functional. Then I realised with the little privacy left, it becomes a more fundamental race of people trying to exploit issues vs. smart blue teamers.
