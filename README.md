@@ -113,7 +113,6 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
 ./terces file dec /path/to/file.trcs  # Restores original
 ```
-- Sequential streaming: Using `openssl` random 10GiB test stream file: Enc: `(18.0s, 569 MB/s)` Dec: `(18.9s, 540 MB/s)` Tests performed on newer Dell entreprise type laptop. On smaller files speed will increase drastically: `[SUCCESS] Decrypted: /tmp/terces_test_2048mb.bin (1.6s, 1295 MB/s)` 
 
 **Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.
 
@@ -125,6 +124,28 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces share <file> <pubkey>        # Encrypt for recipient
 ./terces unshare <file.shrd>          # Decrypt with your FIDO2
 ./terces unshare <file.shrd> <label>  # Decrypt with labeled keypair
+```
+</details>
+
+<details>
+<summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
+
+Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD):
+
+| Operation | File Size | Time | Speed |
+|-----------|-----------|------|-------|
+| **Symmetric Enc** | 10 GiB | 18.0s | 569 MB/s |
+| **Symmetric Dec** | 10 GiB | 18.9s | 540 MB/s |
+| **Symmetric Dec** | 2 GiB | 1.6s | 1295 MB/s |
+| **Asymmetric Share** | 2 GiB | 1.9s | 1097 MB/s |
+| **Asymmetric Unshare** | 2 GiB | 1.6s | 1297 MB/s |
+
+Smaller files are faster due to reduced I/O overhead and better cache utilization in `/tmp`.
+
+Run your own benchmarks:
+```bash
+./tests/large 2048   # 2GB symmetric test
+./tests/asym 2048    # 2GB asymmetric test
 ```
 
 </details>
