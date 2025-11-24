@@ -34,16 +34,13 @@ def unshare_file(file_path: str, label: str = ""):
         device_index=CFG["device_index"]
     )
 
-    if not auth.authenticate():
-        _error("Auth failed")
-        return False
-
-    _success("Auth OK")
-
     # Salt = key_handle + domain separator + optional label (must match keypub.py)
     key_handle = auth.load_key_handle()
     salt = (key_handle + "x25519" + label).encode()
     seed = auth.get_terces(salt)
+    if not seed:
+        _error("Auth failed")
+        return False
     private_key = X25519PrivateKey.from_private_bytes(seed)
 
     # Read file: ephemeral_pubkey (32) + nonce (12) + ciphertext

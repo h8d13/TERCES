@@ -33,12 +33,7 @@ def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE)
         device_index=CFG["device_index"]
     )
 
-    if not auth.authenticate():
-        _error("Auth failed - SSH key generation blocked")
-        return False
-
-    _success("Auth OK - generating SSH key")
-
+    _success("Generating SSH key")
     key_path = SSH_DIR / f"id_{name}_sk"
 
     if key_path.exists():

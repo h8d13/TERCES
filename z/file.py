@@ -32,12 +32,6 @@ def encrypt_file(file_path: str):
         device_index=CFG["device_index"]
     )
 
-    if not auth.authenticate():
-        _error("Auth failed")
-        return False
-
-    _success("Auth OK")
-
     is_dir = path.is_dir()
 
     if is_dir:
@@ -53,7 +47,7 @@ def encrypt_file(file_path: str):
         out_path = Path(f"{path}.trcs")
         salt_name = path.name
 
-    # Use key_handle + filename as salt
+    # Derive key using key_handle + filename as salt
     key_handle = auth.load_key_handle()
     salt = (key_handle + salt_name).encode()
     key = auth.get_terces(salt)
@@ -90,12 +84,6 @@ def decrypt_file(file_path: str):
         rp_id=CFG["rp_id"],
         device_index=CFG["device_index"]
     )
-
-    if not auth.authenticate():
-        _error("Auth failed")
-        return False
-
-    _success("Auth OK")
 
     # Derive same key using key_handle + original filename
     key_handle = auth.load_key_handle()

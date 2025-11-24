@@ -5,9 +5,8 @@ from gnilux import (
     uid,
     is_elevated,
     who_dat,
-    _success,
-    _error,
     _debug,
+    _error,
 )
 
 _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
@@ -15,11 +14,9 @@ _debug(f"{uid} {is_elevated(uid)} {who_dat(uid)} ")
 auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"], device_index=CFG["device_index"])
 
 # --- DECRYPT FLOW ---
-if auth.authenticate():
-    _success("Auth OK")
-    name = input("Name: ").strip()
-    token = auth.decrypt_secret(name)
-    if token:
-        print(f"\n{token}")
+name = input("Name: ").strip()
+token = auth.decrypt_secret(name)
+if token:
+    print(f"\n{token}")
 else:
-    _error('Auth Failed.')
+    _error("Not found or auth failed")

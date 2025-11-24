@@ -7,7 +7,6 @@ from gnilux import (
     CFG,
     U2FKey,
     _success,
-    _error,
 )
 
 
@@ -18,12 +17,6 @@ def export_pubkey(label: str = ""):
         rp_id=CFG["rp_id"],
         device_index=CFG["device_index"]
     )
-
-    if not auth.authenticate():
-        _error("Auth failed")
-        return None
-
-    _success("Auth OK")
 
     # Salt = key_handle + domain separator + optional label
     key_handle = auth.load_key_handle()
@@ -38,6 +31,7 @@ def export_pubkey(label: str = ""):
     pub_bytes = public_key.public_bytes_raw()
     pub_b64 = base64.b64encode(pub_bytes).decode()
 
+    _success("Public key:")
     print(pub_b64)
     return pub_b64
 
