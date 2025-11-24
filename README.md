@@ -14,7 +14,7 @@ Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (G
 - Cannot exfiltrate something that never leaves your device. 
 2. **Guided but enforced hardware binding**
 - If your key does get stolen, 8 PIN attempts and all keys are gone forever.
-3. **Earns you time, sudoless sudo, etc**
+3. **Earns you time, sudoless sudo, etc** and peace of mind 
 - Still works with respective web/mobile apps for auth on websites, etc 
 
 In case your distro doesn't package directly:
