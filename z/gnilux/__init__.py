@@ -15,6 +15,8 @@ from .handlers import (
     _debug,
 )
 
+from .safe_path import is_venv, is_python
+
 from .config import CFG
 from .chapo import U2FKey
 from .keytype import info, list_devices, get_device_info, format_info, ALG_NAMES
@@ -31,6 +33,8 @@ __all__ = [
     "uid",
     "username",
     "is_elevated",
+    "is_venv",
+    "is_python",
     "who_dat",
     "_random",
     "_suuid",

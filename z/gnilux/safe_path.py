@@ -1,7 +1,11 @@
-import os 
+import os
+import sys
 import re
 
-from admin import username
+from .admin import username
+
+is_venv = sys.base_prefix != sys.prefix
+is_python = f'{sys.executable} {sys.version}'
 
 def where_dat(username):
     homepath = os.path.expanduser(f"~{username}")

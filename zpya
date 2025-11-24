@@ -4,12 +4,11 @@ dir_ex() {
 }
 if ! dir_ex ".venv"; then
     echo "Creating .venv ..."
-    if ! python -m venv .venv; then
+    if ! python -m venv --system-site-packages .venv; then
         echo "Failed to create .venv"
         exit 1
     fi
     # shellcheck disable=SC1091
-    . ./.venv/bin/activate
     pip install --upgrade pip && pip install -r requirements.txt
     echo "Done."
 else
