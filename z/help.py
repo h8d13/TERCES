@@ -9,7 +9,7 @@ Secrets:
   setup                   Generate mappings file
   unlock                  Test authentication
   encrypt                 Store a secret (or: stdin | encrypt <name> [desc])
-  decrypt                 Retrieve a secret
+  decrypt [name]          Retrieve a secret (pipe: decrypt <name> | ...)
   gen [len] [name]        Generate password (default 24, optional store)
   vault                   List stored secrets
   delete <name>           Delete a secret

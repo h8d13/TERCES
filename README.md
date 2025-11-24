@@ -45,6 +45,16 @@ Set-up on arch (which asumes base-devel git tar...):
 ./terces reset              # Deletes all locally stored keys
 ```
 
+```
+┌──[04:56]─[systemuser_$@hostx]─[~/somewhere]─[04:56]─[git:master]
+└──╼ $ echo "##Terces Demo##"
+##Terces Demo##
+$ cat example.secret | sudo ./terces encrypt api-key "importantkey"
+$ sudo ./terces decrypt api-key | xclip -sel clip
+$ sk-abcdefghijklmnopqrstuvwxyz1234567890
+``` 
+Pipe frienly ! Again sudo would not be required if using **per-user** mappings.
+
 >[!TIP]
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
 > Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**

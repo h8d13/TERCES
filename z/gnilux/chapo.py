@@ -80,7 +80,7 @@ class U2FKey:
                 pin_token = client_pin.get_pin_token(pin)
                 pin_auth = client_pin.protocol.authenticate(pin_token, client_data_hash)
 
-                print("Touch security key...")
+                _debug("Touch security key...")
                 assertion = ctap.get_assertion(
                     self.rp_id,
                     client_data_hash,
@@ -89,7 +89,7 @@ class U2FKey:
                     pin_uv_protocol=client_pin.protocol.VERSION
                 )
             else:
-                print("Touch security key...")
+                _debug("Touch security key...")
                 assertion = ctap.get_assertion(
                     self.rp_id,
                     client_data_hash,
@@ -180,7 +180,7 @@ class U2FKey:
         # PIN auth for the assertion itself (uses pin_token, NOT shared_secret)
         pin_auth = client_pin.protocol.authenticate(pin_token, client_data_hash)
 
-        print("Touch Security Key...")
+        _debug("Touch security key...")
 
         try:
             assertion = ctap.get_assertion(
