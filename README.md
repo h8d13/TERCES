@@ -130,6 +130,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 <details>
 <summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
 
+
 **Standard operations**
 
 Dell enterprise laptop (NVMe M.2 SSD):
