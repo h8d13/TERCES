@@ -101,26 +101,19 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 
 >[!IMPORTANT]
 > Key is derived from `key_handle + filename`  Renaming `.trcs` files breaks decryption.
-> Protects for attacker would need to know both filename AND your *specific* credentials.
-> This also strips any old metadata as it would only contain `ciphertext` + `nonce`
+> This also strips any old metadata as it only contains `ciphertext` + `nonce` and new file details.
 
 ### Sharing (Asymmetric)
 
 ```bash
-# Alice wants to receive files, generates pk and gives it to Bob and Jack
 ./terces keypub                       # Export your public key
 ./terces keypub <label>               # Different keypair per label
-# Bob and Jack encrypt files FOR Alice with her pubkey
 ./terces share <file> <pubkey>        # Encrypt for recipient
-# Alice can then decrypt using her U2F device
 ./terces unshare <file.shrd>          # Decrypt with your FIDO2
 ./terces unshare <file.shrd> <label>  # Decrypt with labeled keypair
 ```
 
->[!NOTE]
-> Sender doesn't need FIDO2. Only recipient can decrypt.
-
-## Terces install
+## Installing
 
 - Running from Python in isolated venv
 
@@ -130,9 +123,13 @@ We have a helper script `zpya` that downloads Python deps from pip in `.venv`
 
 You can place `TERCES/` anywhere on the system or removable media
 
-Then create a symlink either `ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
+Then create a symlink either:
 
-Or use an alias like: `alias terces='/path/to/TERCES/terces'` TO use only in shell env. 
+`ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
+
+Or use an alias: 
+
+`alias terces='/path/to/TERCES/terces'` To use only in shell env. 
 
 - Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices.
 ---
