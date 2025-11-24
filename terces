@@ -9,7 +9,7 @@ get_local_ver() {
     [[ -n "$dir" ]] && basename "$dir" | sed 's/terces-//' || echo "none"
 }
 
-[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|reset|version|update|portable|ssh|file|keypub|share|unshare)$ ]] || { echo "Usage: $0 list|info|setup|unlock|encrypt|decrypt|reset|version|update|portable|ssh|file|keypub|share|unshare"; exit 1; }
+[[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|secrets|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
 
 [[ "$1" == "setup" ]] && { python -B z/setup.py; exit 0; }
 [[ "$1" == "portable" ]] && { python -B z/portable.py "$2"; exit 0; }
