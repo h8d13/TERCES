@@ -77,7 +77,7 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 
 **Keynames are for you to remember.** using derived `name` and `key_handle` which is **never actually stored.**
 
-**Delete files** - After encryption, originals remain. Remove them yourself **when ready.** We only print a reminder.
+**Delete files** - After encryption, originals remain. Remove them yourself **when ready.** terces only print a reminder.
 
 ---
 
@@ -178,7 +178,7 @@ See reference table: [DevConfig](./terces.cfg.dev)
 
 - Running from Python in isolated venv
 
-We have a helper script `zpya` that downloads Python deps from `pip` in `.venv`
+There is a helper script `zpya` that downloads Python deps from `pip` in `.venv`
 
 - Installing *somewhere*
 
@@ -197,7 +197,7 @@ Or `alias terces='/path/to/TERCES/terces'` To use only in shell env.
 
 ## Updates
 
-*Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
+*Disclaimer:* The project will not be built as a backwards compatible one, terces expect the user to **not update** if they are keeping important data.
 Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
 
 You can use:

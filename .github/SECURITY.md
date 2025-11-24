@@ -45,6 +45,7 @@ Every recovery option is an attack vector:
 
 >[!TIP]
 > The better approach is to set priorities in the actual services themselves major providers all have this (Google, Github, etc...).
+> The second is to buy two keys (or more...) or get them sent to you by the manufacturing brands (please.)
 
 | Recovery Method | Attack Vector |
 |:----------------|:--------------|
@@ -87,8 +88,13 @@ No tool protects against all threats. Understand your threat model.
 
 1. **Use a strong PIN** - 8 attempts is your buffer
 2. **Enable FDE** - full disk encryption on your system
+
+As Artix user/maintainer posted once in [post]() on a forum LemonPie
+
+> *
+
 3. **Multiple keys** - backup hardware key in secure location
-4. **Air-gapped backup** - if critical, decrypt to offline storage
+4. **Air-gapped backup** - if critical, decrypt to offline storage that is contained
 
 ---
 
@@ -96,4 +102,4 @@ No tool protects against all threats. Understand your threat model.
 
 Open an issue or contact maintainer directly.
 
-We take security seriously but this is a personal project reverse engineering `CTAP2` protocol.
+Security is to be taken seriously but this is a **personal** project reverse engineering `CTAP2` protocol.
