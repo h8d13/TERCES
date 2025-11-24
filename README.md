@@ -104,10 +104,12 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ### Sharing (Asymmetric)
 
 ```bash
-./terces keypub <label>               # Export your public key (optional label)
+./terces keypub <label>               # Prepare for sender public key (optional label)
 ./terces share <file> <pubkey>        # Encrypt for recipient (no need for FIDO2 key)
-./terces unshare <file.shrd>          # Decrypt from sender using FIDO2 key (optional label)
+./terces unshare <file.shrd> <label>  # Decrypt from sender using FIDO2 key (optional label)
 ```
+
+> `label` is optional but makes keys non-deterministic like previous approaches in this repo.
 
 ### FIDO2-backed SSH Keys
 
