@@ -3,6 +3,7 @@ import sys
 import struct
 import tempfile
 import tarfile
+import time
 from pathlib import Path
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
@@ -63,19 +64,24 @@ def encrypt_file(file_path: str):
 
     key = auth.get_terces((auth.load_key_handle() + salt_name).encode())
 
+    t0 = time.time()
     if is_dir:
         with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as tmp:
             tmp_path = tmp.name
         with tarfile.open(tmp_path, 'w:gz') as tar:
             tar.add(path, arcname=path.name)
+        size = Path(tmp_path).stat().st_size
         with open(tmp_path, 'rb') as src, open(out_path, 'wb') as dst:
             _enc_stream(src, dst, key)
         Path(tmp_path).unlink()
     else:
+        size = path.stat().st_size
         with open(path, 'rb') as src, open(out_path, 'wb') as dst:
             _enc_stream(src, dst, key)
 
-    _success(f"Encrypted: {out_path}")
+    elapsed = time.time() - t0
+    mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
+    _success(f"Encrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
     print(f"To delete original: rm {'-r ' if is_dir else ''}'{path}'", file=sys.stderr)
     return True
 
@@ -91,13 +97,17 @@ def decrypt_file(file_path: str):
     original_name = path.stem
     key = auth.get_terces((auth.load_key_handle() + original_name).encode())
 
+    size = path.stat().st_size
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
         tmp_path = tmp.name
 
     try:
+        t0 = time.time()
         with open(path, 'rb') as src, open(tmp_path, 'wb') as dst:
             if not _dec_stream(src, dst, key):
                 _error("Invalid format (missing TRCS header)")
+        elapsed = time.time() - t0
+        mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
 
         # Check tar (gzip magic)
         with open(tmp_path, 'rb') as f:
@@ -108,13 +118,13 @@ def decrypt_file(file_path: str):
                 folder = tar.getnames()[0].split('/')[0]
                 tar.extractall(path=path.parent)
             Path(tmp_path).unlink()
-            _success(f"Extracted: {path.parent / folder}")
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
         else:
             out_path = path.with_suffix("")
             if out_path.exists():
                 out_path = out_path.with_stem(f"{out_path.stem}_{_suuid()}")
             Path(tmp_path).rename(out_path)
-            _success(f"Decrypted: {out_path}")
+            _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
     except Exception as e:
         Path(tmp_path).unlink(missing_ok=True)
         _error(f"Decrypt failed: {e}")
