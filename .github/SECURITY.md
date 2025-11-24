@@ -43,6 +43,7 @@ Still allows for sharing using asymetric modules or controlled sharing of keys.
 
 Every recovery option is an attack vector:
 
+>[!TIP]
 > The better approach is to set priorities in the actual services themselves major providers all have this (Google, Github, etc...).
 
 | Recovery Method | Attack Vector |
