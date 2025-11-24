@@ -28,7 +28,7 @@
 
 // key_type: null | "es256" | "eddsa" | "rs256"
 //   COSE algorithm for credentials
-//   null = device default, "eddsa" recommended for Ed25519
+//   null = device default, "eddsa" needed for Ed25519
 
 // resident: false | true
 //   Store credential ON device (discoverable)
@@ -53,7 +53,6 @@
 //   "none" = no compression, instant but larger files
 
 # Do check Yann Collet's work on compression! https://github.com/Cyan4973
-# My gift shall be work on hardware > cryptography linking with such amazing tech as back-ends. 
 
 // ═══════════════════════════════════════════════════════════════════
 // MAPPINGS FORMAT

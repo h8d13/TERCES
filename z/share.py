@@ -1,4 +1,4 @@
-# share.py - Encrypt file for recipient using their public key (streaming)
+# share.py - Encrypt file for recipient using their public key
 import sys
 import struct
 import base64
@@ -20,8 +20,7 @@ MAGIC = b"SHRD"
 
 def share_file(file_path: str, recipient_pubkey: str):
     """
-    Encrypt file for recipient using X25519 + AESGCM hybrid encryption (streaming).
-
+    Encrypt file for recipient using X25519 + AESGCM hybrid encryption.
     Anyone can encrypt for a recipient - no FIDO2 needed for sender.
     Only the recipient (with their FIDO2 device) can decrypt.
     """

@@ -1,4 +1,4 @@
-#decrypt.py
+#decrypt.py - Retrieve secret from vault
 import sys
 from gnilux import (
     CFG,

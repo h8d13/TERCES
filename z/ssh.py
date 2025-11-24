@@ -17,7 +17,6 @@ from gnilux import (
 SSH_DIR = Path(f"~{username}/.ssh").expanduser()
 DEFAULT_KEY_TYPE = "ed25519-sk"
 
-
 def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE):
     """
     Generate FIDO2-backed SSH key after terces authentication.

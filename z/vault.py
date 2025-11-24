@@ -1,4 +1,4 @@
-# vault.py - List stored secrets
+# vault.py - List stored secrets from .d/
 from gnilux import CFG, U2FKey
 
 def list_secrets():

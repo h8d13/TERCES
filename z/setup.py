@@ -4,10 +4,6 @@ import subprocess
 import socket
 from gnilux import CFG, _success, _error, uid, who_dat
 
-if uid != 0:
-    _error("Run with sudo")
-    exit(1)
-
 mappings = CFG["mappings_file"]
 rp_id = CFG["rp_id"] or f"pam://{socket.gethostname()}"
 user = who_dat(uid)

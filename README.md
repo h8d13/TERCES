@@ -9,13 +9,16 @@ FIDO2 Hardware Security Module key-manager. Interfaces directly with `CTAP2` pro
 
 Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (Google), **SoloKey** (US based open-source), **Nitrokey** (German leader in HSM), ...
 
+<details>
+<summary><b>Why ?</b></summary>
 1. **Cloud < hardware only**
 - Cannot fish hardware keys or harder to do (would need browser permissions). 
-- Cannot exfiltrate something that never leaves your device. 
+- Cannot exfiltrate something that never leaves your device(s).
 2. **Guided but enforced hardware binding**
 - If your key does get stolen, 8 PIN attempts and all keys are gone forever.
 3. **Earns you time, sudoless sudo, etc** and peace of mind 
 - Still works with respective web/mobile apps for auth on websites, etc 
+</details>
 
 In case your distro doesn't package directly:
 
@@ -36,7 +39,6 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 ./terces list           # List devices
 ./terces info <term>    # Example "algo", empty for full info
 ./terces help           # Show all commands
-
 ```
 
 ## Usage 🤫
@@ -45,14 +47,15 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 
 ```bash
 ./terces setup              # Generate mappings file
-./terces test <type> <opt>  # Tests using openssl/urandom sha256sum and terces
 ./terces unlock             # Test auth on .cfg
+./terces gen <x> <name>     # Generate password (optional: length, store as name) 
+                # ^^^^ If name is left empty DO NOT save just generate
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
-./terces gen <x> <name>     # Generate password (optional: length, store as name)
 ./terces vault              # List stored secrets in vault
 ./terces delete <name>      # Delete a secret from vault
 ./terces reset              # Deletes all locally stored keys
+./terces test <type> <opt>  # Run test type with options see /tests/
 ```
 
 ```bash 
@@ -67,24 +70,118 @@ Pipe frienly ! Again sudo would not be required if using **per-user** mappings.
 
 >[!TIP]
 > Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
-> Setup terces for local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
+> Setup local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
 
 See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth.
 
 >[!IMPORTANT]
-> If you're wanting to use Terces and already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
-> Do not run setup again as you can keep your exisitng mappings if needed. 
+> If you've already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
+> Do not run setup again as you can keep your exisitng mappings if needed. Or start fresh if desired should be an option in app of provider.
 
-**Keynames are for you to remember.** using derived `name` and `key_handle` which is **never actually stored.**
+- **Keynames are for you to remember.** using derived `name` and `key_handle` which is **never actually stored.**
+- **Delete files** - After encryption, originals remain. Remove them **when ready.** Terces only print a reminder.
 
-**Delete files** - After encryption, originals remain. Remove them yourself **when ready.** terces only print a reminder.
+## Installing
 
 ---
 
-## Advanced Usage 
+## Updates
+
+*Disclaimer:* The project will not be built as a backwards compatible one, terces expect the user to **not update** if they are keeping important data.
+Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
+
+You can use:
+```bash
+./terces version   # Check for remote hash
+./terces update    # Clones fresh copy to different folder
+```
+>[!TIP]
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`
+> This also creates a sub-crypt which means the limit of serets is now not 100 but infinite. You obviously keep registering keys in the hardware too normally. 
+
+---
+
+### Setup
+
+- Use `list` and `info` to see key capabilities.
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. 
+
+See reference table: [DevConfig](./terces.cfg.dev)
+
+- Running from Python in isolated venv
+
+There is a helper script `zpya` that downloads Python deps from `pip` in `.venv`
+
+- Installing *somewhere*
+
+You can place `TERCES/` anywhere on the system or removable media
+
+Then create a symlink either: Check paths: `echo $PATH`
+
+`sudo ln -s /home/johndoe/TECRES/terces /usr/local/bin/terces` or any other `bin/terces` location.
+
+Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
+
+>[!NOTE]
+> Once this is setup you do not need the `./` before commands anymore. 
+
+### Existing 
+
+To enroll existing  you can see [portable](.github/PORTABLE.md) or simply copy existing mappings to target carefully. 
+And make sure that the original `pam://hostname` matched in `rp_id` of `terces.cfg`
+
+```bash
+cp path/to/mappings /path/to/usb/mappings
+# perform the same inversly on the target
+```
+Some actions require several PIN/BIO auths for a simple reason: **Terces never** caches anything. Only interface directly with assertion patterns of the keys themselves. Some other actions do not need interaction at all.
+
+---
+
+## Blazing fast
 
 <details>
-<summary><b>Extras 🎁</b></summary>
+<summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
+
+
+### **Standard operations**
+
+Dell enterprise laptop (NVMe M.2 SSD 256GiB):
+Intel(R) Core(TM) i5-1345U (12) @ 4.70 GHz
+16 GiB RAM - Intel Iris Xe Graphics @ 1.25 GHz
+On Ext4 Full Disk Encrypted. 
+
+| Operation | Size | Speed |
+|:----------|:-----|:------|
+| **File Enc** | 10 GiB | 569 MiB/s |
+| **File Dec** | 10 GiB | 540 MiB/s |
+| **File Dec** | 2 GiB | 1295 MiB/s |
+| **Share** | 2 GiB | 1097 MiB/s |
+| **Unshare** | 2 GiB | 1297 MiB/s |
+
+### **Folder compression** cascades
+
+Using 100 files of 20MiB each `/dev/urandom`
+
+| Compression | Tar | Enc | Dec |
+|:------------|:----|:----|:----|
+| `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
+| `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
+| `gzip` | 35.2s | 944 MiB/s | 1240 MiB/s |
+| `none` | 1.2s | 757 MiB/s | 970 MiB/s | 
+
+```bash
+./terces test large 2048   # Single file in MiB
+./terces test asym 2048    # Asymmetric in MiB
+./terces test folder 50 20 # 50 files x 20 MiB
+```
+
+</details>
+
+## Advanced Use
+
+<details>
+<summary><b>More... 🎁</b></summary>
 
 ### Files/Folders
 
@@ -129,81 +226,10 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 
 **Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
 
-</details>
+### N-ZKP 
 
-## Blazing fast
-
-<details>
-<summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
-
-
-### **Standard operations**
-
-Dell enterprise laptop (NVMe M.2 SSD):
-
-| Operation | Size | Speed |
-|:----------|:-----|:------|
-| **File Enc** | 10 GiB | 569 MiB/s |
-| **File Dec** | 10 GiB | 540 MiB/s |
-| **File Dec** | 2 GiB | 1295 MiB/s |
-| **Share** | 2 GiB | 1097 MiB/s |
-| **Unshare** | 2 GiB | 1297 MiB/s |
-
-### **Folder compression** cascades
-
-Using 100 files of 20MiB each `/dev/urandom`
-
-| Compression | Tar | Enc | Dec |
-|:------------|:----|:----|:----|
-| `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
-| `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
-| `gzip` | 35.2s | 944 MiB/s | 1240 MiB/s |
-| `none` | 1.2s | 757 MiB/s | 970 MiB/s | 
-
-```bash
-./terces test large 2048   # Single file in MiB
-./terces test asym 2048    # Asymmetric in MiB
-./terces test folder 50 20 # 50 files x 20 MiB
-```
+Create challenges using `json` files exportable to others for verification. 
+This can be used as an API from FIDO2 backed device to say a server? From local to remote verif: [See NZKP](.github/NZKP.md)
+You server can then receive and verify time bound auths directly.
 
 </details>
-
-## Installing
-
-- Use `list` and `info` to see key capabilities.
-
-- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. 
-
-See reference table: [DevConfig](./terces.cfg.dev)
-
-- Running from Python in isolated venv
-
-There is a helper script `zpya` that downloads Python deps from `pip` in `.venv`
-
-- Installing *somewhere*
-
-You can place `TERCES/` anywhere on the system or removable media
-
-Then create a symlink either: Check paths: `echo $PATH`
-
-`sudo ln -s /home/johndoe/TECRES/terces /usr/local/bin/terces` or any other `bin/terces` location.
-
-Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
-
->[!NOTE]
-> Once this is setup you do not need the `./` before commands anymore. 
-
----
-
-## Updates
-
-*Disclaimer:* The project will not be built as a backwards compatible one, terces expect the user to **not update** if they are keeping important data.
-Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
-
-You can use:
-```bash
-./terces version   # Check for remote hash
-./terces update    # Clones fresh copy to different folder
-```
->[!TIP]
-> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`

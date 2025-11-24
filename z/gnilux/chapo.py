@@ -1,3 +1,4 @@
+# chapo.py - Main interactions with FIDO2 Keys
 from fido2.hid import CtapHidDevice
 from fido2.ctap2.base import Ctap2
 from fido2.ctap2.pin import ClientPin
@@ -206,6 +207,22 @@ class U2FKey:
 
         _error("No hmac-secret in response")
         raise RuntimeError("No hmac-secret extension in assertion response")
+
+    def get_zkp_secret(self, label: str = "zkp") -> bytes:
+        """
+        Derive a ZKP-specific secret from FIDO2 hmac-secret.
+
+        Uses a dedicated salt namespace to avoid collision with other secrets.
+        The label allows multiple independent ZKP identities per device.
+
+        Args:
+            label: Identity label (default "zkp")
+
+        Returns:
+            32-byte deterministic secret for ZKP derivation
+        """
+        salt = f"tzkp:{label}".encode()
+        return self.get_terces(salt)
 
     def _load_index(self) -> dict:
         """Load the name->UUID mapping"""

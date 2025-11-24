@@ -1,3 +1,4 @@
+# admin.py returns basic system info and holds essentials vars
 import os
 import uuid
 from pathlib import Path

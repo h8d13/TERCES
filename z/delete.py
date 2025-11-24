@@ -4,7 +4,6 @@ import os
 
 from gnilux import CFG, U2FKey, _success, _error
 
-
 def delete_secret(name: str):
     """Delete a secret by name (index entry stays)"""
     auth = U2FKey(
@@ -22,7 +21,6 @@ def delete_secret(name: str):
     os.remove(filename)
     _success(f"Deleted: {name}")
     return True
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

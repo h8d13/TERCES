@@ -29,6 +29,7 @@ Sharing:
   unshare <file> [label]  Decrypt shared file
 
 Other:
+  zkp [command]           Time-bound secrets for APIs
   portable export|import  Backup/restore mappings
   version                 Check for updates
   update                  Download latest version

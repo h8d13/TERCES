@@ -1,5 +1,4 @@
 # portable.py - bootstrap u2f_mappings on new machines
-# Usage: python -B z/portable.py [export|import]
 # Uses PIN-based encryption so mappings aren't plaintext on USB
 import sys
 import os

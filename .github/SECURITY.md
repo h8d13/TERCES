@@ -10,13 +10,15 @@ Traditional password managers have a fundamental problem:
 │  ┌───────────────────────────────────────────────────┐  │
 │  │  Encrypted(master_password, your_secrets)         │  │
 │  │                      ↑                            │  │
-│  │         Attacker steals this blob                 │  │
-│  │         Brute force offline forever               │  │
+│  │         Attacker steals this blob or cloud infra  │  │
+│  │         Pawned offline forever                    │  │
 │  └───────────────────────────────────────────────────┘  │
 └─────────────────────────────────────────────────────────┘
 ```
 
 **The LastPass breach (2022):** Attackers stole encrypted vaults from cloud storage. Every user with a weak master password is now compromised - attackers can guess billions of passwords per second offline, indefinitely.
+
+On the other hand, when you control when a device is on - interacting with lambda other device only if **necessary** and in a predefined way, is when the you get back control over your own privacy and sharing sensitive information. 
 
 **Terces model:**
 
@@ -24,13 +26,13 @@ Traditional password managers have a fundamental problem:
 ┌─────────────────────────────────────────────────────────┐
 │                    LOCAL ONLY                           │
 │  ┌─────────────┐    ┌─────────────┐                     │
-│  │ HardwareKey │ →  │ Derived Key │ → Decrypt           │
-│  │ (required)  │    │ (ephemeral) │                     │
+│  │ HardwareKey │ →  │ Derived Key │ → Local features    │
+│  │ (required)  │    │ (ephemeral) │   External Features │
 │  └─────────────┘    └─────────────┘                     │
 │         ↑                                               │
-│    PIN + Touch                                          │
-│    8 attempts max                                       │
-└─────────────────────────────────────────────────────────┘
+│    PIN + Touch + (Bio)                                  │
+│    8 attempts max                                       │ → [KEY PROVDER SERVICES = HIGHER TRUST]
+└─────────────────────────────────────────────────────────┘   [ ̶V̶e̶r̶s̶u̶s̶ ̶s̶o̶m̶e̶ ̶w̶e̶i̶r̶d̶ ̶U̶I̶ ̶f̶o̶r̶ ̶k̶e̶y̶ ̶m̶n̶g̶.̶.̶.̶]
 ```
 
 No cloud. **No vault to steal.** Can't brute force without physical device and even then only has 8 tries.
@@ -57,7 +59,9 @@ Every recovery option is an attack vector:
 
 **The paradox:** The easier it is to recover, the easier it is to compromise.
 
-### Terces approach: No recovery
+### Terces approach: 
+
+No recovery
 
 - Lose your hardware key = lose access
 - This is a feature, not a bug
@@ -68,8 +72,9 @@ Every recovery option is an attack vector:
 If you need redundancy:
 
 1. **Register multiple hardware keys** during setup
-2. **Store backup key** in physical safe / safety deposit box
-3. **Never** create digital backups of secrets
+2. **Store a backup key** in physical safe / safety deposit box
+3. **Never** create digital backups of should-have-been-local secrets, 
+4. **Do share** important information in fully private ways
 
 ---
 
@@ -80,19 +85,15 @@ If you need redundancy:
 - **Compromise of the hardware key itself** (supply chain, firmware)
 - **You** being coerced into unlocking or making mistakes originally
 
-No tool protects against all threats. Understand your threat model.
+No tool protects against all threats. Understand your threat model or how much you need out of Terces features.
+There are also many general good practices to do that can be found on many sites, forums, etc
 
 ---
 
 ## Recommendations
 
-1. **Use a strong PIN** - 8 attempts is your buffer
-2. **Enable FDE** - full disk encryption on your system
-
-As Artix user/maintainer posted once in [post]() on a forum LemonPie
-
-> *
-
+1. **Use a strong PIN** - 8 attempts is your buffer and the "attacker's"
+2. **Enable FDE** - full disk encryption on your system (especially laptops)
 3. **Multiple keys** - backup hardware key in secure location
 4. **Air-gapped backup** - if critical, decrypt to offline storage that is contained
 
@@ -100,6 +101,6 @@ As Artix user/maintainer posted once in [post]() on a forum LemonPie
 
 ## Reporting Vulnerabilities
 
-Open an issue or contact maintainer directly.
+Open an issue (even for bugs, since it's hard to test other than what we have in [place](tests/)) or contact maintainer directly.
 
 Security is to be taken seriously but this is a **personal** project reverse engineering `CTAP2` protocol.

@@ -1,5 +1,14 @@
 # Portable 
 
+## Simply
+
+```bash
+cp path/to/mappings /path/to/usb/mappings
+# perform the same inversly on the target
+```
+
+Or we also provide some utils to customize or transport encrypted.
+
 ### Already setup on one machine
 
 >In case you have already set it up on machine using default config:
@@ -45,5 +54,6 @@ sudo ./terces setup           # Registers key with your rp_id
 ./terces portable import | sudo tee /etc/u2f_mappings
 ./terces unlock               # Works - same rp_id, same key
 ```
+
 
 ---

@@ -1,3 +1,4 @@
+# sade_path.py - utils for checking if build dirs are safe 
 import os
 import sys
 import re

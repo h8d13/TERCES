@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# Test ZKP proof generation and verification (no FIDO2 required)
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TZKP="$SCRIPT_DIR/z/gnilux/nzkp.py"
+
+BITS=${1:-2048}
+SECRET=$(cat "$SCRIPT_DIR/example.nsecret")
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ZKP UNIT TEST (${BITS}-bit, no FIDO2)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo -e "\n[1/6] Loading RFC 7919 ${BITS}-bit parameters..."
+python3 -c "
+from sys import path
+path.insert(0, '$SCRIPT_DIR/z')
+from gnilux.nzkp import load_rfc3526
+p, g = load_rfc3526($BITS)
+print(f'Prime: {p.bit_length()} bits, g={g}')
+"
+
+echo -e "\n[2/6] Checking entropy..."
+python3 -c "
+from sys import path
+path.insert(0, '$SCRIPT_DIR/z')
+from gnilux.nzkp import check_entropy
+bits, ok, msg = check_entropy($SECRET)
+print(f'Entropy: {bits:.1f} bits')
+print(f'Status: {\"OK\" if ok else \"FAIL\"} - {msg or \"sufficient\"}')
+if not ok: exit(1)
+"
+
+echo -e "\n[3/6] Generating keypair..."
+KEYGEN_OUT=$(python3 "$TZKP" keygen "$SECRET" 2>&1)
+PUBLIC_KEY=$(echo "$KEYGEN_OUT" | grep "Public (full):" | cut -d: -f2 | tr -d ' ')
+echo "Public key: ${PUBLIC_KEY:0:32}..."
+
+echo -e "\n[4/6] Generating proof..."
+PROOF=$(python3 "$TZKP" prove "$SECRET")
+echo "Proof generated:"
+echo "$PROOF" | head -5
+
+echo -e "\n[5/6] Verifying valid proof..."
+VERIFY_OUT=$(python3 "$TZKP" verify "$PUBLIC_KEY" "$PROOF" 2>&1)
+echo "$VERIFY_OUT"
+
+if echo "$VERIFY_OUT" | grep -q "VALID"; then
+    echo -e "\nPASS - Valid proof accepted"
+else
+    echo -e "\nFAIL - Valid proof rejected!"
+    exit 1
+fi
+
+echo -e "\n[6/6] Testing invalid proof rejection..."
+# Corrupt the response
+BAD_PROOF=$(echo "$PROOF" | sed 's/"response": "[0-9]*"/"response": "123456789"/')
+BAD_VERIFY=$(python3 "$TZKP" verify "$PUBLIC_KEY" "$BAD_PROOF" 2>&1 || true)
+echo "$BAD_VERIFY"
+
+if echo "$BAD_VERIFY" | grep -q "INVALID"; then
+    echo -e "\nPASS - Invalid proof rejected"
+else
+    echo -e "\nFAIL - Invalid proof accepted!"
+    exit 1
+fi
+
+echo -e "\n[7/8] Testing scrypt key derivation..."
+DERIVE_OUT=$(python3 "$TZKP" derive "strong_password_123!" 2>&1)
+DERIVED_KEY=$(echo "$DERIVE_OUT" | grep "Derived key:" | cut -d: -f2 | tr -d ' ')
+SALT=$(echo "$DERIVE_OUT" | grep "Salt:" | cut -d: -f2 | tr -d ' ')
+echo "Salt: $SALT"
+echo "Derived: ${DERIVED_KEY:0:32}..."
+
+# Verify deterministic with same salt
+DERIVE2_OUT=$(python3 "$TZKP" derive "strong_password_123!" "$SALT" 2>&1)
+DERIVED_KEY2=$(echo "$DERIVE2_OUT" | grep "Derived key:" | cut -d: -f2 | tr -d ' ')
+
+if [ "$DERIVED_KEY" = "$DERIVED_KEY2" ]; then
+    echo -e "\nPASS - Scrypt deterministic with same salt"
+else
+    echo -e "\nFAIL - Scrypt not deterministic!"
+    exit 1
+fi
+
+echo -e "\n[8/8] Testing session token generation..."
+TOKEN_OUT=$(python3 "$TZKP" session-token "$SECRET" "user@test.com" 2>&1)
+TOKEN=$(echo "$TOKEN_OUT" | python3 -c "import sys,json; print(json.load(sys.stdin)['token'])")
+NONCE=$(echo "$TOKEN_OUT" | python3 -c "import sys,json; print(json.load(sys.stdin)['nonce'])")
+echo "Token: ${TOKEN:0:40}..."
+echo "Nonce: $NONCE"
+
+if [ -n "$TOKEN" ] && [ -n "$NONCE" ]; then
+    echo -e "\nPASS - Session token generated"
+else
+    echo -e "\nFAIL - Session token missing fields!"
+    exit 1
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ALL ZKP UNIT TESTS PASSED"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

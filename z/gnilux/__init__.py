@@ -1,3 +1,6 @@
+from .chapo import U2FKey
+from .config import CFG
+
 from .admin import (
     VERSION,
     uid,
@@ -17,8 +20,6 @@ from .handlers import (
 
 from .safe_path import is_venv, is_python, is_safe_path
 
-from .config import CFG
-from .chapo import U2FKey
 from .keytype import info, list_devices, get_device_info, format_info, ALG_NAMES
 
 __all__ = [

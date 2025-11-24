@@ -1,4 +1,4 @@
-#encrypt.py
+#encrypt.py - Stores a secret in vault and let's you use stdin
 import sys
 from gnilux import (
     CFG,

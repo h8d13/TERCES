@@ -1,4 +1,4 @@
-# unshare.py - Decrypt file shared with you using FIDO2-derived private key (streaming)
+# unshare.py - Decrypt file shared with you using FIDO2-derived private key
 import sys
 import struct
 import hashlib
@@ -19,7 +19,7 @@ MAGIC = b"SHRD"
 
 def unshare_file(file_path: str, label: str = ""):
     """
-    Decrypt file that was shared with you (streaming).
+    Decrypt file that was shared with you 
 
     Requires your FIDO2 device to derive the private key.
     """

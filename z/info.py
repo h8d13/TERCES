@@ -1,4 +1,4 @@
-#info.py
+#info.py - Debug some stuff see info of key with grep like pattern
 import sys
 from gnilux import (
     CFG,

@@ -1,3 +1,4 @@
+#unlock.py - Test auth
 from gnilux import (
     VERSION,
     CFG,

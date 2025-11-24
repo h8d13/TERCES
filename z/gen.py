@@ -13,7 +13,7 @@ from gnilux import (
 CHARSET = string.ascii_letters + string.digits + "!@#$%^&*"
 
 
-def generate(length: int = 24, store_as: str = None):
+def generate(length: int = 24, store_as: str | None = None):
     """Generate a secure password, optionally store it"""
     password = ''.join(secrets.choice(CHARSET) for _ in range(length))
 

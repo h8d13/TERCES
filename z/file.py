@@ -1,4 +1,5 @@
 # file.py - FIDO2-backed file/folder encryption (streaming, sequential)
+# Uses built)in compression types provided by tar using 64MiB chunks
 import sys
 import struct
 import subprocess
@@ -22,7 +23,6 @@ from gnilux import (
 CHUNK = 64 * 1024 * 1024  # 64 MiB chunks
 MAGIC = b"TRCS"
 
-
 def _enc_stream(src, dst, key, total_size: int = 0):
     """Encrypt file in streaming chunks"""
     dst.write(MAGIC)
@@ -40,7 +40,6 @@ def _enc_stream(src, dst, key, total_size: int = 0):
 
     if total_size > 0:
         print(file=sys.stderr)
-
 
 def _dec_stream(src, dst, key, total_size: int = 0):
     """Decrypt file in streaming chunks"""
@@ -64,7 +63,6 @@ def _dec_stream(src, dst, key, total_size: int = 0):
     if total_size > 0:
         print(file=sys.stderr)
     return True
-
 
 def encrypt_file(file_path: str, dest: str | None = None):
     path = Path(file_path)
@@ -166,7 +164,6 @@ def encrypt_file(file_path: str, dest: str | None = None):
     print(f"To delete original: rm {'-r ' if is_dir else ''}'{path}'", file=sys.stderr)
     return True
 
-
 def decrypt_file(file_path: str, dest: str | None = None):
     path = Path(file_path)
     if not path.exists():
@@ -262,7 +259,6 @@ def decrypt_file(file_path: str, dest: str | None = None):
         _error(f"Decrypt failed: {e}")
 
     return True
-
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:

@@ -9,7 +9,6 @@ from gnilux import (
     _success,
 )
 
-
 def export_pubkey(label: str = ""):
     """Derive X25519 keypair from FIDO2 and export public key"""
     auth = U2FKey(

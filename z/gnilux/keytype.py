@@ -9,11 +9,9 @@ from .handlers import _error, _nf_warn
 # Map algorithm codes to names
 ALG_NAMES = {-7: "es256", -8: "eddsa", -35: "es384", -36: "es512", -257: "rs256"}
 
-
 def _fmt_alg(alg) -> str:
     code = alg.get("alg") if isinstance(alg, dict) else alg
     return ALG_NAMES.get(code, str(code)) if code else str(alg)
-
 
 def get_device_info(dev, idx: int = 0) -> dict:
     """
@@ -60,7 +58,6 @@ def get_device_info(dev, idx: int = 0) -> dict:
         "uv_retries": uv_retries,
         "firmware_version": info.firmware_version,
     }
-
 
 def format_info(d: dict) -> str:
     """Format device info dict for display"""
@@ -111,7 +108,6 @@ def list_devices() -> list[dict]:
         print(f"{i}: {d['path']}")
 
     return results
-
 
 def info(filter_pattern: str | None = None, device_index: int | None = None) -> dict | list[dict]:
     """
