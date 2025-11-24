@@ -38,7 +38,8 @@ Set-up on arch:
 ./terces unlock             # Test auth
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
-./terces secrets            # List stored secrets
+./terces gen [len] [name]   # Generate password (optional: length, store as name)
+./terces vault              # List stored secrets
 ./terces delete <name>      # Delete a secret
 ./terces reset              # Deletes all locally stored keys
 ```

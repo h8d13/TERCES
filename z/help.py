@@ -10,7 +10,8 @@ Secrets:
   unlock                  Test authentication
   encrypt                 Store a secret
   decrypt                 Retrieve a secret
-  secrets                 List stored secrets
+  gen [len] [name]        Generate password (default 24, optional store)
+  vault                   List stored secrets
   delete <name>           Delete a secret
   reset                   Delete all data
 
