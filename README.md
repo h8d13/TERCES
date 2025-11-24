@@ -95,12 +95,17 @@ You can use:
 
 Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
 
-Destination is optional and uses default `TERCES/` root. 
-
 ```bash
 ./terces file enc /path/to/file <dest>          # Creates file.trcs or folder.tar.trcs
 ./terces file dec /path/to/file.trcs <dest>     # Restores original
 ```
+
+Destination is optional and by default uses same dir of source file. Example your file is in project root of `TERCES/`
+
+```bash
+./terces file enc lol.jpg /backup/
+./terces file dec /backup/lol.jpg.trcs ~/Pictures/  
+``` 
 
 **Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.
 
