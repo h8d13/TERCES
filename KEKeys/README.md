@@ -6,9 +6,9 @@ This still unfortunatly doesn't provide as strong inegration as `systemd-crypten
 
 ---
 
-Script in repo builds `pam-u2f` from source, generates **system-wide** mappings, see inside script comments for `pam.d` configuration.
+Script in repo builds `pam-u2f` from source, generates **system-wide** mappings, see inside script comments for `pam.d` configuration. [Setup](./setup_u2f_key) 
 
-[Dependancies](./build_deps) and [Setup](./setup_u2f_key)
+[Dependancies](./build_deps)
 
 >[!NOTE]
 > This is for systems that do not package `pam-u2f` directly. And builds necessary `.so` files in the expected directory.
