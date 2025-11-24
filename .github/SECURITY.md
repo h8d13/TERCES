@@ -34,7 +34,9 @@ Traditional password managers have a fundamental problem:
 ```
 
 No cloud. **No vault to steal.** Can't brute force without physical device and even then only has 8 tries.
-Still allows for sharing using asymetric modules. 
+
+Still allows for sharing using asymetric modules or controlled sharing of keys.
+
 ---
 
 ## Recovery Mechanisms Are a Security Risk
