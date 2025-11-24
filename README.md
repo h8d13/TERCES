@@ -3,7 +3,7 @@
 <img align="left" src="./.github/assets/usb_d.svg#gh-light-mode-only" width="80" alt="usb lock icon">
 <img align="left" src="./.github/assets/usb_l.svg#gh-dark-mode-only" width="80" alt="usb lock icon">
 
-FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to passwords is 63 chars. 
+FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to PIN is 63 chars UTF-8. 
 
 <br clear="left">
 
