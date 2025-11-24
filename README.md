@@ -82,7 +82,7 @@ You can use:
 ./terces update    # Clones fresh copy to different folder
 ```
 >[!TIP]
-> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where TERCES/ lives as: `.d/terces-0003`
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`
 
 ---
 
@@ -95,9 +95,11 @@ You can use:
 
 Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
 
+Destination is optional and uses default `TERCES/` root. 
+
 ```bash
-./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
-./terces file dec /path/to/file.trcs  # Restores original
+./terces file enc /path/to/file <dest>          # Creates file.trcs or folder.tar.trcs
+./terces file dec /path/to/file.trcs <dest>     # Restores original
 ```
 
 **Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.

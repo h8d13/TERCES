@@ -66,7 +66,7 @@ def _dec_stream(src, dst, key, total_size: int = 0):
     return True
 
 
-def encrypt_file(file_path: str):
+def encrypt_file(file_path: str, dest: str | None = None):
     path = Path(file_path)
     if not path.exists():
         _error(f"Not found: {path}")
@@ -75,7 +75,17 @@ def encrypt_file(file_path: str):
 
     auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"], device_index=CFG["device_index"])
     is_dir = path.is_dir()
-    out_path = Path(f"{path}.tar.trcs" if is_dir else f"{path}.trcs")
+    default_name = f"{path.name}.tar.trcs" if is_dir else f"{path.name}.trcs"
+
+    if dest:
+        dest_path = Path(dest)
+        if dest_path.is_dir():
+            out_path = dest_path / default_name
+        else:
+            out_path = dest_path
+    else:
+        out_path = path.parent / default_name
+
     salt_name = path.name + (".tar" if is_dir else "")
 
     key = auth.get_terces((auth.load_key_handle() + salt_name).encode())
@@ -157,7 +167,7 @@ def encrypt_file(file_path: str):
     return True
 
 
-def decrypt_file(file_path: str):
+def decrypt_file(file_path: str, dest: str | None = None):
     path = Path(file_path)
     if not path.exists():
         _error(f"Not found: {path}")
@@ -167,6 +177,18 @@ def decrypt_file(file_path: str):
     auth = U2FKey(mappings_file=CFG["mappings_file"], rp_id=CFG["rp_id"], device_index=CFG["device_index"])
     original_name = path.stem
     key = auth.get_terces((auth.load_key_handle() + original_name).encode())
+
+    # Determine output location
+    if dest:
+        dest_path = Path(dest)
+        if dest_path.is_dir():
+            extract_dir = dest_path
+        else:
+            extract_dir = dest_path.parent
+            dest_path.parent.mkdir(parents=True, exist_ok=True)
+    else:
+        dest_path = None
+        extract_dir = path.parent
 
     size = path.stat().st_size
     with tempfile.NamedTemporaryFile(delete=False) as tmp:
@@ -197,18 +219,18 @@ def decrypt_file(file_path: str):
         if is_gzip:
             with tarfile.open(tmp_path, 'r:gz') as tar:
                 folder = tar.getnames()[0].split('/')[0]
-                tar.extractall(path=path.parent, filter='data')
+                tar.extractall(path=extract_dir, filter='data')
             Path(tmp_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
+            _success(f"Extracted: {extract_dir / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_zstd:
             # Decompress with zstd first
             tar_path = tmp_path + ".tar"
             subprocess.run(["zstd", "-d", "-q", "--rm", "-o", tar_path, tmp_path], check=True)
             with tarfile.open(tar_path, 'r') as tar:
                 folder = tar.getnames()[0].split('/')[0]
-                tar.extractall(path=path.parent, filter='data')
+                tar.extractall(path=extract_dir, filter='data')
             Path(tar_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
+            _success(f"Extracted: {extract_dir / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_lz4:
             # Decompress with lz4 first
             tar_path = tmp_path + ".tar"
@@ -216,19 +238,23 @@ def decrypt_file(file_path: str):
             Path(tmp_path).unlink()
             with tarfile.open(tar_path, 'r') as tar:
                 folder = tar.getnames()[0].split('/')[0]
-                tar.extractall(path=path.parent, filter='data')
+                tar.extractall(path=extract_dir, filter='data')
             Path(tar_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
+            _success(f"Extracted: {extract_dir / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_plain_tar:
             with tarfile.open(tmp_path, 'r') as tar:
                 folder = tar.getnames()[0].split('/')[0]
-                tar.extractall(path=path.parent, filter='data')
+                tar.extractall(path=extract_dir, filter='data')
             Path(tmp_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
+            _success(f"Extracted: {extract_dir / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         else:
-            out_path = path.with_suffix("")
-            if out_path.exists():
-                out_path = out_path.with_stem(f"{out_path.stem}_{_suuid()}")
+            # Regular file (not archive)
+            if dest_path and not dest_path.is_dir():
+                out_path = dest_path
+            else:
+                out_path = extract_dir / path.stem.removesuffix('.tar')
+                if out_path.exists():
+                    out_path = out_path.with_stem(f"{out_path.stem}_{_suuid()}")
             Path(tmp_path).rename(out_path)
             _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
     except Exception as e:
@@ -240,12 +266,13 @@ def decrypt_file(file_path: str):
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: ./terces file <enc|dec> <path>", file=sys.stderr)
+        print("Usage: ./terces file <enc|dec> <path> [dest]", file=sys.stderr)
         sys.exit(1)
     cmd, file_path = sys.argv[1], sys.argv[2]
+    dest = sys.argv[3] if len(sys.argv) > 3 else None
     if cmd in ("enc", "e"):
-        encrypt_file(file_path)
+        encrypt_file(file_path, dest)
     elif cmd in ("dec", "d"):
-        decrypt_file(file_path)
+        decrypt_file(file_path, dest)
     else:
         _error(f"Unknown: {cmd}")

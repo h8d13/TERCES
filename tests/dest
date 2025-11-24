@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+# Test custom destination for file encryption/decryption
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
+
+SIZE_MIB=${1:-10}  # Default 10 MiB (small, just testing dest logic)
+TEST_FILE="/tmp/terces_dest_test.bin"
+ENC_DEST="/tmp/terces_enc_dest"
+DEC_DEST="/tmp/terces_dec_dest"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  DESTINATION PARAMETER TEST (${SIZE_MIB} MiB)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Cleanup
+rm -rf "$TEST_FILE" "$ENC_DEST" "$DEC_DEST"
+mkdir -p "$ENC_DEST" "$DEC_DEST"
+
+echo -e "\n[1/7] Creating test file..."
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MIB" status=progress 2>&1
+
+echo -e "\n[2/7] Computing original checksum..."
+ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
+echo "SHA256: ${ORIG_SUM:0:16}..."
+
+echo -e "\n[3/7] Encrypting to custom dest (touch your key)..."
+"$TERCES" file enc "$TEST_FILE" "$ENC_DEST"
+
+# Verify encrypted file is in dest
+ENC_FILE="$ENC_DEST/terces_dest_test.bin.trcs"
+if [ ! -f "$ENC_FILE" ]; then
+    echo "FAIL - Encrypted file not found at $ENC_FILE"
+    exit 1
+fi
+echo "  Encrypted file at: $ENC_FILE"
+
+echo -e "\n[4/7] Removing original..."
+rm "$TEST_FILE"
+
+echo -e "\n[5/7] Decrypting to custom dest (touch your key)..."
+"$TERCES" file dec "$ENC_FILE" "$DEC_DEST"
+
+echo -e "\n[6/7] Verifying decrypted file location..."
+DEC_FILE="$DEC_DEST/terces_dest_test.bin"
+if [ ! -f "$DEC_FILE" ]; then
+    echo "FAIL - Decrypted file not found at $DEC_FILE"
+    exit 1
+fi
+echo "  Decrypted file at: $DEC_FILE"
+
+echo -e "\n[7/7] Verifying checksum..."
+DEC_SUM=$(sha256sum "$DEC_FILE" | cut -d' ' -f1)
+echo "SHA256: ${DEC_SUM:0:16}..."
+
+echo ""
+if [ "$ORIG_SUM" = "$DEC_SUM" ]; then
+    echo "PASS - Checksums match, dest parameter works"
+else
+    echo "FAIL - Checksums differ!"
+    exit 1
+fi
+
+rm -rf "$ENC_DEST" "$DEC_DEST"
+echo "Done."
