@@ -168,7 +168,7 @@ We have a helper script `zpya` that downloads Python deps from pip in `.venv`
 
 You can place `TERCES/` anywhere on the system or removable media
 
-Then create a symlink either:
+Then create a symlink either: Check paths: `echo $PATH`
 
 `ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
 
