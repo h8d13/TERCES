@@ -11,6 +11,7 @@ Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (G
 
 <details>
 <summary><b>Why ?</b></summary>
+
 1. **Cloud < hardware only**
 - Cannot fish hardware keys or harder to do (would need browser permissions). 
 - Cannot exfiltrate something that never leaves your device(s).
@@ -18,6 +19,7 @@ Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (G
 - If your key does get stolen, 8 PIN attempts and all keys are gone forever.
 3. **Earns you time, sudoless sudo, etc** and peace of mind 
 - Still works with respective web/mobile apps for auth on websites, etc 
+
 </details>
 
 In case your distro doesn't package directly:
