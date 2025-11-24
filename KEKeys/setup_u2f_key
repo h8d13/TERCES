@@ -23,10 +23,7 @@ make install
 cd /
 rm -rf "$BUILD_DIR"
 
-
-
 echo "pam-u2f installation complete."
-echo "Edit the .cfg then sudo ./terces setup"
 echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."
 
 ### Passwordless sudo
@@ -64,3 +61,18 @@ echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accord
 #
 # 2. Same credential - use custom rp_id everywhere, configure PAM with origin=pam://your-rp-id
 #    Portable across machines, but PAM config must match on each machine 
+
+# To then set up the same key for kde for example
+
+# sudo install -D -o $USER -m 600 /etc/u2f_mappings /home/$USER/.config/Yubico/u2f_keys
+
+## modify /etc/pam.d/kde
+# #%PAM-1.0
+# auth       sufficient                  pam_u2f.so cue
+# auth       include                     system-local-login
+
+# account    include                     system-local-login
+
+# password   include                     system-local-login
+
+# session    include                     system-local-login
