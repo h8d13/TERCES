@@ -100,7 +100,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces file dec /path/to/file.trcs <dest>     # Restores original
 ```
 
-> `dest` is optional and by default uses same dir of source file. Example your file is in project root of `TERCES/`
+> `dest` is optional and by default uses same dir of source file. Ex: file is in project root of `TERCES/`
 
 ```bash
 ./terces file enc lol.jpg 
