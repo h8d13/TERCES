@@ -119,11 +119,9 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ### Sharing (Asymmetric)
 
 ```bash
-./terces keypub                       # Export your public key
-./terces keypub <label>               # Different keypair per label
-./terces share <file> <pubkey>        # Encrypt for recipient
-./terces unshare <file.shrd>          # Decrypt with your FIDO2
-./terces unshare <file.shrd> <label>  # Decrypt with labeled keypair
+./terces keypub <label>               # Export your public key (optional label)
+./terces share <file> <pubkey>        # Encrypt for recipient (no need for FIDO2 key)
+./terces unshare <file.shrd>          # Decrypt from sender (optional label)
 ```
 </details>
 
