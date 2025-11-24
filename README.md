@@ -55,8 +55,8 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > If you're wanting to use Terces and already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
 > Do not run setup again as you can keep your exisitng mappings if needed. 
 
-- **Names are up to you to remember.** A key needs to be retrieved using it's name which is **never actually stored.**
-- **Delete files** - After encryption, originals remain. Remove them yourself when ready. 
+- **Names are for you to remember.** A keyis retrieved using it's name which is **never actually stored.**
+- **Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
 
 ## Updates
 
