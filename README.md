@@ -7,7 +7,7 @@ FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `C
 
 <br clear="left">
 
-This works for *any* Fido2 compliant USB hardware: YubiKey (Yubico), Titan (Google), SoloKey (US based open-source), Nitrokey (German leader in HSM), ...
+Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (Google), **SoloKey** (US based open-source), **Nitrokey** (German leader in HSM), ...
 
 In case your distro doesn't package directly:
 
