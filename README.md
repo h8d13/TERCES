@@ -78,8 +78,10 @@ Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as 
 
 ---
 
+## Advanced Use Cases
+
 <details>
-<summary><b>Advanced Use Cases</b></summary>
+<summary><b>Extras</b></summary>
 
 ### FIDO2-backed SSH Keys
 
