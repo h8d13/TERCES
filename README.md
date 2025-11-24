@@ -70,8 +70,7 @@ Then re-enroll manually to upgrade/migrate.
 Generate SSH keys backed by your security key. Requires terces auth before key generation.
 
 ```bash
-./terces ssh <name>            # Generate resident ed25519-sk key
-./terces ssh <name> --no-res   # Non-resident (stored locally only)
+./terces ssh <name>            # Generate resident ed25519-sk key or --no-res
 # Set it up with respective provider
 ./terces ssh test gitlab.com   # Test directly (with your provider)
 ```
