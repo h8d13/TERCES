@@ -7,6 +7,8 @@ FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `C
 
 <br clear="left">
 
+This works for *any* Fido2 compliant USB hardware: YubiKey (Yubico), Titan (Google), SoloKey (open source), Nitrokey (german leader in HSM), ...
+
 In case your distro doesn't package directly:
 
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version (say you are using open-rc for example).
