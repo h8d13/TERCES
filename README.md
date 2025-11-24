@@ -140,11 +140,11 @@ Dell enterprise laptop (NVMe M.2 SSD):
 
 | Operation | Size | Speed |
 |-----------|------|-------|
-| **File Enc** | 10 GiB | 569 MB/s |
-| **File Dec** | 10 GiB | 540 MB/s |
-| **File Dec** | 2 GiB | 1295 MB/s |
-| **Share** | 2 GiB | 1097 MB/s |
-| **Unshare** | 2 GiB | 1297 MB/s |
+| **File Enc** | 10 GiB | 569 MiB/s |
+| **File Dec** | 10 GiB | 540 MiB/s |
+| **File Dec** | 2 GiB | 1295 MiB/s |
+| **Share** | 2 GiB | 1097 MiB/s |
+| **Unshare** | 2 GiB | 1297 MiB/s |
 
 ### **Folder compression** cascades
 
@@ -152,15 +152,15 @@ Using 100 files of 20MiB each `/dev/urandom`
 
 | `compression` | Tar | Enc | Dec |
 |---------------|-----|-----|-----|
-| `lz4` | 3.6s | 881 MB/s | 1239 MB/s |
-| `zstd` | 3.7s | 812 MB/s | 1257 MB/s |
-| `gzip` | 35.2s | 944 MB/s | 1240 MB/s |
-| `none` | 1.2s | 757 MB/s | 970 MB/s | 
+| `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
+| `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
+| `gzip` | 35.2s | 944 MiB/s | 1240 MiB/s |
+| `none` | 1.2s | 757 MiB/s | 970 MiB/s | 
 
 ```bash
-./terces test large 2048   # Single file
-./terces test asym 2048    # Asymmetric
-./terces test folder 50 20 # 50 files x 20MB
+./terces test large 2048   # Single file in MiB
+./terces test asym 2048    # Asymmetric in MiB
+./terces test folder 50 20 # 50 files x 20 MiB
 ```
 
 </details>
