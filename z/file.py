@@ -1,6 +1,8 @@
 # file.py - FIDO2-backed file/folder encryption (streaming, sequential)
 import sys
 import struct
+import subprocess
+import shutil
 import tempfile
 import tarfile
 import time
@@ -14,6 +16,7 @@ from gnilux import (
     _suuid,
     _success,
     _error,
+    _debug,
 )
 
 CHUNK = 64 * 1024 * 1024  # 64MB chunks
@@ -77,24 +80,79 @@ def encrypt_file(file_path: str):
 
     key = auth.get_terces((auth.load_key_handle() + salt_name).encode())
 
-    t0 = time.time()
     if is_dir:
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as tmp:
-            tmp_path = tmp.name
-        with tarfile.open(tmp_path, 'w:gz') as tar:
-            tar.add(path, arcname=path.name)
+        # Count files for progress
+        all_files = list(path.rglob('*'))
+        file_count = len([f for f in all_files if f.is_file()])
+        added = [0]
+
+        def tar_filter(tarinfo):
+            if tarinfo.isfile():
+                added[0] += 1
+                print(f"\r[TAR] {added[0]}/{file_count} files", end="", file=sys.stderr)
+            return tarinfo
+
+        compression = CFG.get("compression", "zstd")
+        has_zstd = shutil.which("zstd") is not None
+        has_lz4 = shutil.which("lz4") is not None
+
+        t_tar = time.time()
+        if compression == "lz4" and has_lz4:
+            # Create uncompressed tar, then pipe through lz4
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.tar') as tmp:
+                tar_path = tmp.name
+            with tarfile.open(tar_path, 'w') as tar:
+                tar.add(path, arcname=path.name, filter=tar_filter)
+            print(" compressing...", end="", file=sys.stderr)
+            tmp_path = tar_path + ".lz4"
+            subprocess.run(["lz4", "-q", "--rm", tar_path, tmp_path], check=True)
+        elif compression == "zstd" and has_zstd:
+            # Create uncompressed tar, then pipe through zstd
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.tar') as tmp:
+                tar_path = tmp.name
+            with tarfile.open(tar_path, 'w') as tar:
+                tar.add(path, arcname=path.name, filter=tar_filter)
+            print(" compressing...", end="", file=sys.stderr)
+            tmp_path = tar_path + ".zst"
+            subprocess.run(["zstd", "-q", "--rm", "-o", tmp_path, tar_path], check=True)
+        elif compression == "none":
+            # No compression
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.tar') as tmp:
+                tmp_path = tmp.name
+            with tarfile.open(tmp_path, 'w') as tar:
+                tar.add(path, arcname=path.name, filter=tar_filter)
+        else:
+            # Fallback to gzip
+            if compression == "lz4" and not has_lz4:
+                _debug("lz4 not found, using gzip")
+            if compression == "zstd" and not has_zstd:
+                _debug("zstd not found, using gzip")
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.tar.gz') as tmp:
+                tmp_path = tmp.name
+            with tarfile.open(tmp_path, 'w:gz') as tar:
+                tar.add(path, arcname=path.name, filter=tar_filter)
+
+        tar_elapsed = time.time() - t_tar
+        comp_label = compression if (compression == "lz4" and has_lz4) or (compression == "zstd" and has_zstd) else ("none" if compression == "none" else "gzip")
+        print(f" [{comp_label}] ({tar_elapsed:.1f}s)", file=sys.stderr)
+
         size = Path(tmp_path).stat().st_size
+        t_enc = time.time()
         with open(tmp_path, 'rb') as src, open(out_path, 'wb') as dst:
             _enc_stream(src, dst, key, size)
+        enc_elapsed = time.time() - t_enc
         Path(tmp_path).unlink()
+
+        mbs = (size / 1024 / 1024) / enc_elapsed if enc_elapsed > 0 else 0
+        _success(f"Encrypted: {out_path} (tar:{tar_elapsed:.1f}s enc:{enc_elapsed:.1f}s, {mbs:.0f} MB/s)")
     else:
         size = path.stat().st_size
+        t0 = time.time()
         with open(path, 'rb') as src, open(out_path, 'wb') as dst:
             _enc_stream(src, dst, key, size)
-
-    elapsed = time.time() - t0
-    mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
-    _success(f"Encrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+        elapsed = time.time() - t0
+        mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
+        _success(f"Encrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
     print(f"To delete original: rm {'-r ' if is_dir else ''}'{path}'", file=sys.stderr)
     return True
 
@@ -122,14 +180,49 @@ def decrypt_file(file_path: str):
         elapsed = time.time() - t0
         mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
 
-        # Check tar (gzip magic)
+        # Detect archive type by magic bytes
         with open(tmp_path, 'rb') as f:
-            is_tar = f.read(2) == b'\x1f\x8b'
+            magic = f.read(4)
 
-        if is_tar:
+        is_gzip = magic[:2] == b'\x1f\x8b'
+        is_zstd = magic == b'\x28\xb5\x2f\xfd'
+        is_lz4 = magic == b'\x04\x22\x4d\x18'
+        # Check for plain tar (magic at offset 257)
+        is_plain_tar = False
+        if not is_gzip and not is_zstd and not is_lz4:
+            with open(tmp_path, 'rb') as f:
+                f.seek(257)
+                is_plain_tar = f.read(5) == b'ustar'
+
+        if is_gzip:
             with tarfile.open(tmp_path, 'r:gz') as tar:
                 folder = tar.getnames()[0].split('/')[0]
-                tar.extractall(path=path.parent)
+                tar.extractall(path=path.parent, filter='data')
+            Path(tmp_path).unlink()
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+        elif is_zstd:
+            # Decompress with zstd first
+            tar_path = tmp_path + ".tar"
+            subprocess.run(["zstd", "-d", "-q", "--rm", "-o", tar_path, tmp_path], check=True)
+            with tarfile.open(tar_path, 'r') as tar:
+                folder = tar.getnames()[0].split('/')[0]
+                tar.extractall(path=path.parent, filter='data')
+            Path(tar_path).unlink()
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+        elif is_lz4:
+            # Decompress with lz4 first
+            tar_path = tmp_path + ".tar"
+            subprocess.run(["lz4", "-d", "-q", tmp_path, tar_path], check=True)
+            Path(tmp_path).unlink()
+            with tarfile.open(tar_path, 'r') as tar:
+                folder = tar.getnames()[0].split('/')[0]
+                tar.extractall(path=path.parent, filter='data')
+            Path(tar_path).unlink()
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+        elif is_plain_tar:
+            with tarfile.open(tmp_path, 'r') as tar:
+                folder = tar.getnames()[0].split('/')[0]
+                tar.extractall(path=path.parent, filter='data')
             Path(tmp_path).unlink()
             _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
         else:

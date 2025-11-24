@@ -1,5 +1,7 @@
 import sys
 
+from .config import CFG
+
 RED = "\033[91m"
 YELLOW = "\033[93m"
 GREEN = "\033[92m"
@@ -17,5 +19,6 @@ def _nf_warn(message):
     print(f"{YELLOW}[WARNING]{RESET} {message}", file=sys.stderr)
 
 def _debug(message):
-    print(f"{BLUE}[DEBUG]{RESET} {message}", file=sys.stderr)
+    if CFG.get("debug", False):
+        print(f"{BLUE}[DEBUG]{RESET} {message}", file=sys.stderr)
 

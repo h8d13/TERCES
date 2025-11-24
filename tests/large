@@ -1,6 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test large file symmetric encryption/decryption with integrity check
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
 
 SIZE_MB=${1:-10240}  # Default 10GB
 TEST_FILE="/tmp/terces_test_${SIZE_MB}mb.bin"
@@ -17,13 +20,13 @@ ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
 echo "SHA256: ${ORIG_SUM:0:16}..."
 
 echo -e "\n[3/6] Encrypting (touch your key)..."
-./terces file enc "$TEST_FILE"
+"$TERCES" file enc "$TEST_FILE"
 
 echo -e "\n[4/6] Removing original..."
 rm "$TEST_FILE"
 
 echo -e "\n[5/6] Decrypting (touch your key)..."
-./terces file dec "${TEST_FILE}.trcs"
+"$TERCES" file dec "${TEST_FILE}.trcs"
 
 echo -e "\n[6/6] Verifying checksum..."
 # Find decrypted file (might have _uuid suffix)

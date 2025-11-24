@@ -1,6 +1,9 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Test large file asymmetric encryption/decryption with integrity check
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
 
 SIZE_MB=${1:-10240}  # Default 10GB
 TEST_FILE="/tmp/terces_asym_test_${SIZE_MB}mb.bin"
@@ -10,7 +13,7 @@ echo "  ASYMMETRIC ENCRYPTION TEST (${SIZE_MB}MB)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo -e "\n[1/7] Getting public key (touch your key)..."
-PUBKEY=$(./terces keypub 2>/dev/null | tail -1)
+PUBKEY=$("$TERCES" keypub 2>/dev/null | tail -1)
 echo "Pubkey: ${PUBKEY:0:16}..."
 
 echo -e "\n[2/7] Creating test file..."
@@ -21,13 +24,13 @@ ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
 echo "SHA256: ${ORIG_SUM:0:16}..."
 
 echo -e "\n[4/7] Sharing (encrypting for self)..."
-./terces share "$TEST_FILE" "$PUBKEY"
+"$TERCES" share "$TEST_FILE" "$PUBKEY"
 
 echo -e "\n[5/7] Removing original..."
 rm "$TEST_FILE"
 
 echo -e "\n[6/7] Unsharing (touch your key)..."
-./terces unshare "${TEST_FILE}.shrd"
+"$TERCES" unshare "${TEST_FILE}.shrd"
 
 echo -e "\n[7/7] Verifying checksum..."
 DEC_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)

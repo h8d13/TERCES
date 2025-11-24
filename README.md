@@ -130,35 +130,40 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 <details>
 <summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
 
-## Table examples
+**Standard operations**
 
-Sequential streaming on newer Dell enterprise laptop (NVMe M.2 SSD): 
-> You might have better hardware than I do 💻
+Dell enterprise laptop (NVMe M.2 SSD):
 
-| Operation | File Size | Time | Speed |
-|-----------|-----------|------|-------|
-| **Symmetric Enc** | 10 GiB | 18.0s | 569 MB/s |
-| **Symmetric Dec** | 10 GiB | 18.9s | 540 MB/s |
-| **Symmetric Dec** | 2 GiB | 1.6s | 1295 MB/s |
-| **Asymmetric Share** | 2 GiB | 1.9s | 1097 MB/s |
-| **Asymmetric Unshare** | 2 GiB | 1.6s | 1297 MB/s |
+| Operation | Size | Speed |
+|-----------|------|-------|
+| **File Enc** | 10 GiB | 569 MB/s |
+| **File Dec** | 10 GiB | 540 MB/s |
+| **File Dec** | 2 GiB | 1295 MB/s |
+| **Share** | 2 GiB | 1097 MB/s |
+| **Unshare** | 2 GiB | 1297 MB/s |
 
-### Run your own
+**Folder compression** 
 
-Smaller files are faster due to reduced I/O overhead and better cache utilization in `/tmp`.
+Using 100 files of 20MiB each `/dev/urandom`
 
-Run your own benchmarks:
+| `compression` | Tar | Enc | Dec |
+|---------------|-----|-----|-----|
+| `lz4` | 3.6s | 881 MB/s | 1239 MB/s |
+| `zstd` | 3.7s | 812 MB/s | 1257 MB/s |
+| `gzip` | 35.2s | 944 MB/s | 1240 MB/s |
+| `none` | 1.2s | 757 MB/s | 970 MB/s | 
+
 ```bash
-./terces test <type> <size> # Test files using openssl sha256sum and terces 
-./terces test large 2048 
-# or asym instead of large
+terces test large 2048   # Single file
+terces test folder 50 20 # 50 files x 20MB
+terces test asym 2048    # Asymmetric
 ```
 
 </details>
 
 ## Installing
 
-- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices.
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. See reference table: [DevConfig](./terces.cfg.dev)
 
 - Running from Python in isolated venv
 

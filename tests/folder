@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# Test folder encryption/decryption with multiple files (sequential I/O)
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
+
+NUM_FILES=${1:-50}       # Default 50 files
+SIZE_MB=${2:-20}         # Default 20MB per file
+TEST_DIR="/tmp/terces_testfolder"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  FOLDER ENCRYPTION TEST (${NUM_FILES} x ${SIZE_MB}MB)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Cleanup any previous test
+rm -rf "$TEST_DIR" "${TEST_DIR}.tar.trcs"
+mkdir -p "$TEST_DIR"
+
+echo -e "\n[1/6] Creating ${NUM_FILES} test files (${SIZE_MB}MB each)..."
+for i in $(seq 1 "$NUM_FILES"); do
+    dd if=/dev/urandom of="${TEST_DIR}/file_${i}.bin" bs=1M count="$SIZE_MB" status=none
+    printf "\r  Created %d/%d files" "$i" "$NUM_FILES"
+done
+echo ""
+
+TOTAL_SIZE=$((NUM_FILES * SIZE_MB))
+echo "  Total: ${TOTAL_SIZE}MB across ${NUM_FILES} files"
+
+echo -e "\n[2/6] Computing original checksums..."
+ORIG_SUM=$(find "$TEST_DIR" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+echo "Combined SHA256: ${ORIG_SUM:0:16}..."
+
+echo -e "\n[3/6] Encrypting folder (touch your key)..."
+"$TERCES" file enc "$TEST_DIR"
+
+echo -e "\n[4/6] Removing original folder..."
+rm -rf "$TEST_DIR"
+
+echo -e "\n[5/6] Decrypting folder (touch your key)..."
+"$TERCES" file dec "${TEST_DIR}.tar.trcs"
+
+echo -e "\n[6/6] Verifying checksums..."
+DEC_SUM=$(find "$TEST_DIR" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+echo "Combined SHA256: ${DEC_SUM:0:16}..."
+
+echo ""
+if [ "$ORIG_SUM" = "$DEC_SUM" ]; then
+    echo "PASS - Checksums match"
+else
+    echo "FAIL - Checksums differ!"
+    exit 1
+fi
+
+rm -rf "$TEST_DIR" "${TEST_DIR}.tar.trcs"
+echo "Done."
