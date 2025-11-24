@@ -175,7 +175,7 @@ See reference table: [DevConfig](./terces.cfg.dev)
 
 - Running from Python in isolated venv
 
-We have a helper script `zpya` that downloads Python deps from pip in `.venv`
+We have a helper script `zpya` that downloads Python deps from `pip` in `.venv`
 
 - Installing *somewhere*
 
