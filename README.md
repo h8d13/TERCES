@@ -23,7 +23,7 @@ Set-up on arch:
 
 ```bash
 ./terces list           # List devices
-./terces info <term>    # Example "algo"
+./terces info <term>    # Example "algo", empty for full info
 ```
 
 ## Usage 🤫
