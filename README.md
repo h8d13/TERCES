@@ -9,12 +9,10 @@ FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `C
 
 In case your distro doesn't package directly:
 
-- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
-- And integrate to `pam.d` for system-login, login-manager, etc...
+- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version (say you are using open-rc for example).
+- And integrate to `pam.d` for system-login, login-manager, etc... Helps you integrate with system even if not packaged by your distro, if it is:
 
-> Helps you integrate with system even if not packaged by your distro, if it is:
-
-Set-up on arch (which asumes base-devel git tar...): 
+Set-up on arch (which asumes base-devel git tar): 
 
 `sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
 
@@ -32,7 +30,6 @@ Set-up on arch (which asumes base-devel git tar...):
 ## Usage 🤫
 
 > Global mappings require sudo. Per-user mappings **DO NOT.**
-> Find mapping path in `terces.cfg`
 
 ```bash
 ./terces setup              # Generate mappings file
@@ -65,8 +62,7 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 > If you're wanting to use Terces and already have registered keys please see multi-hosts installs [Portable](.github/PORTABLE.md) 
 > Do not run setup again as you can keep your exisitng mappings if needed. 
 
-- **Names are for you to remember.** A keys retrieved using it's name which is **never actually stored.**
-- **Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
+**Names are for you to remember.** A keys retrieved using it's name which is **never actually stored.**
 
 ## Updates
 
@@ -104,6 +100,8 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 
 Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
 
+**Delete files** - After encryption, originals remain. Remove them yourself **when ready.**
+
 ```bash
 ./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
 ./terces file dec /path/to/file.trcs  # Restores original
@@ -125,6 +123,8 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 
 ## Installing
 
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices.
+
 - Running from Python in isolated venv
 
 We have a helper script `zpya` that downloads Python deps from pip in `.venv`
@@ -136,10 +136,6 @@ You can place `TERCES/` anywhere on the system or removable media
 Then create a symlink either:
 
 `ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
-
-Or use an alias: 
-
 `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
 
-- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices.
 ---
