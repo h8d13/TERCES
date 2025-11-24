@@ -1,6 +1,8 @@
-# unshare.py - Decrypt file shared with you using FIDO2-derived private key
+# unshare.py - Decrypt file shared with you using FIDO2-derived private key (streaming)
 import sys
+import struct
 import hashlib
+import time
 from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -12,9 +14,12 @@ from gnilux import (
     _error,
 )
 
+MAGIC = b"SHRD"
+
+
 def unshare_file(file_path: str, label: str = ""):
     """
-    Decrypt file that was shared with you.
+    Decrypt file that was shared with you (streaming).
 
     Requires your FIDO2 device to derive the private key.
     """
@@ -43,33 +48,50 @@ def unshare_file(file_path: str, label: str = ""):
         return False
     private_key = X25519PrivateKey.from_private_bytes(seed)
 
-    # Read file: ephemeral_pubkey (32) + nonce (12) + ciphertext
-    data = path.read_bytes()
-    ephemeral_pub_bytes = data[:32]
-    nonce = data[32:44]
-    ciphertext = data[44:]
+    size = path.stat().st_size
+    out_path = path.with_suffix("")  # remove .shrd
+    t0 = time.time()
 
-    # Reconstruct sender's ephemeral public key
-    ephemeral_pub = X25519PublicKey.from_public_bytes(ephemeral_pub_bytes)
-
-    # ECDH: derive shared secret
-    shared_secret = private_key.exchange(ephemeral_pub)
-
-    # Derive AES key from shared secret
-    aes_key = hashlib.sha256(shared_secret).digest()
-
-    # Decrypt
-    cipher = AESGCM(aes_key)
     try:
-        plaintext = cipher.decrypt(nonce, ciphertext, None)
-    except Exception:
-        _error("Decryption failed - file not shared with you or corrupted")
+        with open(path, 'rb') as src, open(out_path, 'wb') as dst:
+            # Read header: MAGIC + ephemeral_pubkey (32)
+            if src.read(4) != MAGIC:
+                _error("Invalid format (missing SHRD header)")
+                return False
+
+            ephemeral_pub_bytes = src.read(32)
+            ephemeral_pub = X25519PublicKey.from_public_bytes(ephemeral_pub_bytes)
+
+            # ECDH: derive shared secret
+            shared_secret = private_key.exchange(ephemeral_pub)
+
+            # Derive AES key from shared secret
+            aes_key = hashlib.sha256(shared_secret).digest()
+
+            # Stream decrypt
+            cipher = AESGCM(aes_key)
+            processed = 4 + 32  # magic + ephemeral pubkey already read
+
+            while hdr := src.read(4):
+                length = struct.unpack("<I", hdr)[0]
+                nonce = src.read(12)
+                enc = src.read(length)
+                dec = cipher.decrypt(nonce, enc, None)
+                dst.write(dec)
+                processed += 4 + 12 + length
+                pct = (processed / size) * 100
+                print(f"\r[UNSHARE] {processed // (1024*1024)}MB / {size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+
+            print(file=sys.stderr)
+
+    except Exception as e:
+        out_path.unlink(missing_ok=True)
+        _error(f"Decryption failed - file not shared with you or corrupted: {e}")
         return False
 
-    out_path = path.with_suffix("")  # remove .shrd
-    out_path.write_bytes(plaintext)
-
-    _success(f"Decrypted: {out_path}")
+    elapsed = time.time() - t0
+    mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
+    _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
     return True
 
 

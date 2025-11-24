@@ -1,4 +1,4 @@
-# file.py - FIDO2-backed file/folder encryption (streaming)
+# file.py - FIDO2-backed file/folder encryption (streaming, sequential)
 import sys
 import struct
 import tempfile
@@ -14,39 +14,52 @@ from gnilux import (
     _suuid,
     _success,
     _error,
-    _debug,
 )
 
-CHUNK = 512 * 1024 * 1024  # 512MB chunks
+CHUNK = 64 * 1024 * 1024  # 64MB chunks
 MAGIC = b"TRCS"
 
 
-def _enc_stream(src, dst, key):
-    """Encrypt in chunks - any size"""
-    cipher = AESGCM(key)
+def _enc_stream(src, dst, key, total_size: int = 0):
+    """Encrypt file in streaming chunks"""
     dst.write(MAGIC)
-    n = 0
+    aesgcm = AESGCM(key)
+    processed = 0
+
     while chunk := src.read(CHUNK):
         nonce = _random(12)
-        enc = cipher.encrypt(nonce, chunk, None)
+        enc = aesgcm.encrypt(nonce, chunk, None)
         dst.write(struct.pack("<I", len(enc)) + nonce + enc)
-        n += 1
-    _debug(f"{n} chunks")
+        processed += len(chunk)
+        if total_size > 0:
+            pct = (processed / total_size) * 100
+            print(f"\r[ENC] {processed // (1024*1024)}MB / {total_size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+
+    if total_size > 0:
+        print(file=sys.stderr)
 
 
-def _dec_stream(src, dst, key):
-    """Decrypt chunks - returns False if old format"""
+def _dec_stream(src, dst, key, total_size: int = 0):
+    """Decrypt file in streaming chunks"""
     if src.read(4) != MAGIC:
         return False
-    cipher = AESGCM(key)
-    while True:
-        hdr = src.read(4)
-        if not hdr:
-            break
+
+    aesgcm = AESGCM(key)
+    processed = 4  # magic already read
+
+    while hdr := src.read(4):
         length = struct.unpack("<I", hdr)[0]
         nonce = src.read(12)
         enc = src.read(length)
-        dst.write(cipher.decrypt(nonce, enc, None))
+        dec = aesgcm.decrypt(nonce, enc, None)
+        dst.write(dec)
+        processed += 4 + 12 + length
+        if total_size > 0:
+            pct = (processed / total_size) * 100
+            print(f"\r[DEC] {processed // (1024*1024)}MB / {total_size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+
+    if total_size > 0:
+        print(file=sys.stderr)
     return True
 
 
@@ -72,12 +85,12 @@ def encrypt_file(file_path: str):
             tar.add(path, arcname=path.name)
         size = Path(tmp_path).stat().st_size
         with open(tmp_path, 'rb') as src, open(out_path, 'wb') as dst:
-            _enc_stream(src, dst, key)
+            _enc_stream(src, dst, key, size)
         Path(tmp_path).unlink()
     else:
         size = path.stat().st_size
         with open(path, 'rb') as src, open(out_path, 'wb') as dst:
-            _enc_stream(src, dst, key)
+            _enc_stream(src, dst, key, size)
 
     elapsed = time.time() - t0
     mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
@@ -104,7 +117,7 @@ def decrypt_file(file_path: str):
     try:
         t0 = time.time()
         with open(path, 'rb') as src, open(tmp_path, 'wb') as dst:
-            if not _dec_stream(src, dst, key):
+            if not _dec_stream(src, dst, key, size):
                 _error("Invalid format (missing TRCS header)")
         elapsed = time.time() - t0
         mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0

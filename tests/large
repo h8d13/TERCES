@@ -1,0 +1,43 @@
+#!/bin/bash
+# Test large file symmetric encryption/decryption with integrity check
+set -e
+
+SIZE_MB=${1:-10240}  # Default 10GB
+TEST_FILE="/tmp/terces_test_${SIZE_MB}mb.bin"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  SYMMETRIC ENCRYPTION TEST (${SIZE_MB}MB)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo -e "\n[1/6] Creating test file..."
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MB" status=progress 2>&1
+
+echo -e "\n[2/6] Computing original checksum..."
+ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
+echo "SHA256: ${ORIG_SUM:0:16}..."
+
+echo -e "\n[3/6] Encrypting (touch your key)..."
+./terces file enc "$TEST_FILE"
+
+echo -e "\n[4/6] Removing original..."
+rm "$TEST_FILE"
+
+echo -e "\n[5/6] Decrypting (touch your key)..."
+./terces file dec "${TEST_FILE}.trcs"
+
+echo -e "\n[6/6] Verifying checksum..."
+# Find decrypted file (might have _uuid suffix)
+DEC_FILE=$(find /tmp -maxdepth 1 -name "terces_test_${SIZE_MB}mb*.bin" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2)
+DEC_SUM=$(sha256sum "$DEC_FILE" | cut -d' ' -f1)
+echo "SHA256: ${DEC_SUM:0:16}..."
+
+echo ""
+if [ "$ORIG_SUM" = "$DEC_SUM" ]; then
+    echo "PASS - Checksums match"
+else
+    echo "FAIL - Checksums differ!"
+    exit 1
+fi
+
+rm -f "$DEC_FILE" "${TEST_FILE}.trcs"
+echo "Done."

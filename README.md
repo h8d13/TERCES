@@ -16,7 +16,7 @@ In case your distro doesn't package directly:
 
 Helps you blend HSM with software even if not packaged by your distro, if it is:
 
-Set-up on arch (which asumes `base-devel git tar`): 
+Set-up on arch (which asumes `base-devel git tar openssl`): 
 
 `sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
 
@@ -37,6 +37,7 @@ Set-up on arch (which asumes `base-devel git tar`):
 
 ```bash
 ./terces setup              # Generate mappings file
+./terces test <type> <size> # Test files using openssl sha256sum and terces 
 ./terces unlock             # Test auth
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
@@ -112,6 +113,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces file enc /path/to/file       # Creates file.trcs or folder.tar.trcs
 ./terces file dec /path/to/file.trcs  # Restores original
 ```
+- Sequential streaming: Using `openssl` random 10GiB test stream file: Enc: `(18.0s, 569 MB/s)` Dec: `(18.9s, 540 MB/s)` Tests performed on newer Dell entreprise type laptop. On smaller files speed will increase drastically: `[SUCCESS] Decrypted: /tmp/terces_test_2048mb.bin (1.6s, 1295 MB/s)` 
 
 **Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.
 

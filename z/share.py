@@ -1,7 +1,9 @@
-# share.py - Encrypt file for recipient using their public key
+# share.py - Encrypt file for recipient using their public key (streaming)
 import sys
+import struct
 import base64
 import hashlib
+import time
 from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PrivateKey, X25519PublicKey
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -12,10 +14,13 @@ from gnilux import (
     _error,
 )
 
+CHUNK = 64 * 1024 * 1024  # 64MB chunks
+MAGIC = b"SHRD"
+
 
 def share_file(file_path: str, recipient_pubkey: str):
     """
-    Encrypt file for recipient using X25519 + AESGCM hybrid encryption.
+    Encrypt file for recipient using X25519 + AESGCM hybrid encryption (streaming).
 
     Anyone can encrypt for a recipient - no FIDO2 needed for sender.
     Only the recipient (with their FIDO2 device) can decrypt.
@@ -48,18 +53,32 @@ def share_file(file_path: str, recipient_pubkey: str):
     # Derive AES key from shared secret
     aes_key = hashlib.sha256(shared_secret).digest()
 
-    # Encrypt file
-    plaintext = path.read_bytes()
-    nonce = _random(12)
-    cipher = AESGCM(aes_key)
-    ciphertext = cipher.encrypt(nonce, plaintext, None)
-
-    # Output format: ephemeral_pubkey (32) + nonce (12) + ciphertext
-    ephemeral_pub_bytes = ephemeral_public.public_bytes_raw()
+    # Stream encrypt
+    size = path.stat().st_size
     out_path = Path(f"{path}.shrd")
-    out_path.write_bytes(ephemeral_pub_bytes + nonce + ciphertext)
+    t0 = time.time()
 
-    _success(f"Shared: {out_path}")
+    with open(path, 'rb') as src, open(out_path, 'wb') as dst:
+        # Header: MAGIC + ephemeral_pubkey (32)
+        dst.write(MAGIC)
+        dst.write(ephemeral_public.public_bytes_raw())
+
+        cipher = AESGCM(aes_key)
+        processed = 0
+
+        while chunk := src.read(CHUNK):
+            nonce = _random(12)
+            enc = cipher.encrypt(nonce, chunk, None)
+            dst.write(struct.pack("<I", len(enc)) + nonce + enc)
+            processed += len(chunk)
+            pct = (processed / size) * 100
+            print(f"\r[SHARE] {processed // (1024*1024)}MB / {size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+
+        print(file=sys.stderr)
+
+    elapsed = time.time() - t0
+    mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
+    _success(f"Shared: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
     return True
 
 
