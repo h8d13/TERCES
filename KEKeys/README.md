@@ -28,6 +28,7 @@ Inside the setup script you will find all instructions needed to integrate fully
 
 Terces derived keys briefly exist in RAM during operations. For truly tin-foil paranoid setups:
 Assumes you are already on a FDE system. 
+We have an install script in [VaseX](https://github.com/h8d13/VaseX) which uses PKBF2 on LVM/LUKS2 with Grub2.
 
 ### Compressed zram swap with zramen
 
