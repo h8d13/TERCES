@@ -37,7 +37,7 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 
 ```bash
 ./terces setup              # Generate mappings file
-./terces test <type> <opt> # Test files using openssl sha256sum and terces 
+./terces test <type> <opt>  # Tests using openssl/urandom sha256sum and terces
 ./terces unlock             # Test auth on .cfg
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
