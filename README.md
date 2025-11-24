@@ -117,7 +117,7 @@ Generate SSH keys backed by your security key. Requires terces auth before key g
 ```
 Can find more info [GITUTILS](./.github/GITUTILS.md)
 
-Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function.
+Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function or locally.
 
 **Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
 
