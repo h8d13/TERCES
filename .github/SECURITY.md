@@ -24,8 +24,8 @@ Traditional password managers have a fundamental problem:
 ┌─────────────────────────────────────────────────────────┐
 │                    LOCAL ONLY                           │
 │  ┌─────────────┐    ┌─────────────┐                     │
-│  │ Hardware Key │ →  │ Derived Key │ → Decrypt          │
-│  │ (required)   │    │ (ephemeral) │                    │
+│  │ HardwareKey │ →  │ Derived Key │ → Decrypt           │
+│  │ (required)  │    │ (ephemeral) │                     │
 │  └─────────────┘    └─────────────┘                     │
 │         ↑                                               │
 │    PIN + Touch                                          │
