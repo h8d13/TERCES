@@ -30,7 +30,10 @@ def generate(length: int = 24, store_as: str = None):
             _error("Auth failed - password not stored")
             return password
 
-        auth.encrypt_secret(store_as, password, f"gen:{length}")
+        # Count existing gen entries for index
+        index = auth._load_index()
+        gen_count = sum(1 for v in index.values() if v.get("description", "").startswith("gen"))
+        auth.encrypt_secret(store_as, password, f"gen{gen_count}")
         _success(f"Stored as: {store_as}")
 
     return password
