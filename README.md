@@ -158,7 +158,7 @@ Dell enterprise laptop (NVMe M.2 SSD):
 
 Using 100 files of 20MiB each `/dev/urandom`
 
-| `compression` | Tar | Enc | Dec |
+| Compression | Tar | Enc | Dec |
 |---------------|-----|-----|-----|
 | `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
 | `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
