@@ -9,12 +9,12 @@ FIDO2 Hardware Security Module key-manager. Interfaces directly with `CTAP2` pro
 
 Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (Google), **SoloKey** (US based open-source), **Nitrokey** (German leader in HSM), ...
 
-1. Cloud < hardware only
+1. **Cloud < hardware only**
 - Cannot fish hardware keys or harder to do (would need browser permissions). 
 - Cannot exfiltrate something that never leaves your device. 
-2. Guided but enforced hardware binding
-- If your key does get stolen, **8 PIN attempts** and all keys are gone forever.
-3. Earns you time, sudoless sudo, etc 
+2. **Guided but enforced hardware binding**
+- If your key does get stolen, 8 PIN attempts and all keys are gone forever.
+3. **Earns you time, sudoless sudo, etc**
 - Still works with respective web/mobile apps for auth on websites, etc 
 
 In case your distro doesn't package directly:
