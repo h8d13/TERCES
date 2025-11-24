@@ -45,7 +45,7 @@ Set-up on arch (which asumes base-devel git tar...):
 ./terces reset              # Deletes all locally stored keys
 ```
 
-```
+```bash 
 ┌──[04:56]─[systemuser_$@hostx]─[~/somewhere]─[04:56]─[git:master]
 └──╼ $ echo "##Terces Demo##"
 ##Terces Demo##
