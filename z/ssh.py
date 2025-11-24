@@ -72,10 +72,13 @@ def generate(name: str, resident: bool = True, key_type: str = DEFAULT_KEY_TYPE)
         pub_path = Path(f"{key_path}.pub")
         if pub_path.exists():
             pubkey = pub_path.read_text().strip()
+            # Count existing ssh entries for index
+            index = auth._load_index()
+            ssh_count = sum(1 for v in index.values() if v.get("description", "").startswith("ssh"))
             auth.encrypt_secret(
                 name=f"ssh:{name}",
                 plaintext=pubkey,
-                description=f"ssh-key:{name}"
+                description=f"ssh{ssh_count}"
             )
         return True
     else:
