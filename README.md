@@ -71,19 +71,6 @@ See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and 
 
 **Delete files** - After encryption, originals remain. Remove them yourself **when ready.** We only print a reminder.
 
-## Updates
-
-*Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
-Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
-
-You can use:
-```bash
-./terces version   # Check for remote hash
-./terces update    # Clones fresh copy to different folder
-```
->[!TIP]
-> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`
-
 ---
 
 ## Advanced Usage 
@@ -199,3 +186,16 @@ Or `alias terces='/path/to/TERCES/terces'` To use only in shell env.
 > Once this is setup you do not need the `./` before commands anymore. 
 
 ---
+
+## Updates
+
+*Disclaimer:* The project will not be built as a backwards compatible one, we expect the user to **not update** if they are keeping important data.
+Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
+
+You can use:
+```bash
+./terces version   # Check for remote hash
+./terces update    # Clones fresh copy to different folder
+```
+>[!TIP]
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`
