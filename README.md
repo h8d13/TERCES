@@ -85,27 +85,12 @@ Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as 
 
 ---
 
-## Advanced Use Cases
+## Advanced Usage 
 
 <details>
 <summary><b>Extras 🎁</b></summary>
 
-### FIDO2-backed SSH Keys
-
-Generate SSH keys backed by your security key. Requires terces auth before key generation.
-
-```bash
-./terces ssh <name>            # Generate resident ed25519-sk key or --no-res
-# Set it up with respective provider
-./terces ssh test gitlab.com   # Test directly (with your provider)
-```
-Can find more info [GITUTILS](./.github/GITUTILS.md)
-
-Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function.
-
-**Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
-
-### File/Folder Encryption
+### Files/Folders
 
 Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
 
@@ -123,6 +108,22 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 ./terces share <file> <pubkey>        # Encrypt for recipient (no need for FIDO2 key)
 ./terces unshare <file.shrd>          # Decrypt from sender using FIDO2 key (optional label)
 ```
+
+### FIDO2-backed SSH Keys
+
+Generate SSH keys backed by your security key. Requires terces auth before key generation.
+
+```bash
+./terces ssh <name>            # Generate resident ed25519-sk key or --no-res
+# Set it up with respective provider
+./terces ssh test gitlab.com   # Test directly (with your provider)
+```
+Can find more info [GITUTILS](./.github/GITUTILS.md)
+
+Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function.
+
+**Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
+
 </details>
 
 ## Blazing fast
