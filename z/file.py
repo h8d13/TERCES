@@ -19,7 +19,7 @@ from gnilux import (
     _debug,
 )
 
-CHUNK = 64 * 1024 * 1024  # 64MB chunks
+CHUNK = 64 * 1024 * 1024  # 64 MiB chunks
 MAGIC = b"TRCS"
 
 
@@ -36,7 +36,7 @@ def _enc_stream(src, dst, key, total_size: int = 0):
         processed += len(chunk)
         if total_size > 0:
             pct = (processed / total_size) * 100
-            print(f"\r[ENC] {processed // (1024*1024)}MB / {total_size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+            print(f"\r[ENC] {processed // (1024*1024)} MiB / {total_size // (1024*1024)} MiB ({pct:.0f}%)", end="", file=sys.stderr)
 
     if total_size > 0:
         print(file=sys.stderr)
@@ -59,7 +59,7 @@ def _dec_stream(src, dst, key, total_size: int = 0):
         processed += 4 + 12 + length
         if total_size > 0:
             pct = (processed / total_size) * 100
-            print(f"\r[DEC] {processed // (1024*1024)}MB / {total_size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+            print(f"\r[DEC] {processed // (1024*1024)} MiB / {total_size // (1024*1024)} MiB ({pct:.0f}%)", end="", file=sys.stderr)
 
     if total_size > 0:
         print(file=sys.stderr)
@@ -144,7 +144,7 @@ def encrypt_file(file_path: str):
         Path(tmp_path).unlink()
 
         mbs = (size / 1024 / 1024) / enc_elapsed if enc_elapsed > 0 else 0
-        _success(f"Encrypted: {out_path} (tar:{tar_elapsed:.1f}s enc:{enc_elapsed:.1f}s, {mbs:.0f} MB/s)")
+        _success(f"Encrypted: {out_path} (tar:{tar_elapsed:.1f}s enc:{enc_elapsed:.1f}s, {mbs:.0f} MiB/s)")
     else:
         size = path.stat().st_size
         t0 = time.time()
@@ -152,7 +152,7 @@ def encrypt_file(file_path: str):
             _enc_stream(src, dst, key, size)
         elapsed = time.time() - t0
         mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
-        _success(f"Encrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+        _success(f"Encrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
     print(f"To delete original: rm {'-r ' if is_dir else ''}'{path}'", file=sys.stderr)
     return True
 
@@ -199,7 +199,7 @@ def decrypt_file(file_path: str):
                 folder = tar.getnames()[0].split('/')[0]
                 tar.extractall(path=path.parent, filter='data')
             Path(tmp_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_zstd:
             # Decompress with zstd first
             tar_path = tmp_path + ".tar"
@@ -208,7 +208,7 @@ def decrypt_file(file_path: str):
                 folder = tar.getnames()[0].split('/')[0]
                 tar.extractall(path=path.parent, filter='data')
             Path(tar_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_lz4:
             # Decompress with lz4 first
             tar_path = tmp_path + ".tar"
@@ -218,19 +218,19 @@ def decrypt_file(file_path: str):
                 folder = tar.getnames()[0].split('/')[0]
                 tar.extractall(path=path.parent, filter='data')
             Path(tar_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         elif is_plain_tar:
             with tarfile.open(tmp_path, 'r') as tar:
                 folder = tar.getnames()[0].split('/')[0]
                 tar.extractall(path=path.parent, filter='data')
             Path(tmp_path).unlink()
-            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+            _success(f"Extracted: {path.parent / folder} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
         else:
             out_path = path.with_suffix("")
             if out_path.exists():
                 out_path = out_path.with_stem(f"{out_path.stem}_{_suuid()}")
             Path(tmp_path).rename(out_path)
-            _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+            _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
     except Exception as e:
         Path(tmp_path).unlink(missing_ok=True)
         _error(f"Decrypt failed: {e}")

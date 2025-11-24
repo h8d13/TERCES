@@ -14,7 +14,7 @@ from gnilux import (
     _error,
 )
 
-CHUNK = 64 * 1024 * 1024  # 64MB chunks
+CHUNK = 64 * 1024 * 1024  # 64 MiB chunks
 MAGIC = b"SHRD"
 
 
@@ -72,13 +72,13 @@ def share_file(file_path: str, recipient_pubkey: str):
             dst.write(struct.pack("<I", len(enc)) + nonce + enc)
             processed += len(chunk)
             pct = (processed / size) * 100
-            print(f"\r[SHARE] {processed // (1024*1024)}MB / {size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+            print(f"\r[SHARE] {processed // (1024*1024)} MiB / {size // (1024*1024)} MiB ({pct:.0f}%)", end="", file=sys.stderr)
 
         print(file=sys.stderr)
 
     elapsed = time.time() - t0
     mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
-    _success(f"Shared: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+    _success(f"Shared: {out_path} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
     return True
 
 

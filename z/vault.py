@@ -1,5 +1,5 @@
 # vault.py - List stored secrets
-from gnilux import CFG, U2FKey, _success, _error
+from gnilux import CFG, U2FKey
 
 def list_secrets():
     """List all stored secrets from the index"""
@@ -17,7 +17,7 @@ def list_secrets():
 
     print("Stored secrets:")
     print("-" * 40)
-    for uid, data in index.items():
+    for _, data in index.items():
         desc = data.get("description", "")
         time = data.get("time", "")[:10]  # date only
         print(f"  {desc:<20} ({time})")

@@ -5,15 +5,15 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 TERCES="$SCRIPT_DIR/terces"
 
-SIZE_MB=${1:-10240}  # Default 10GB
-TEST_FILE="/tmp/terces_test_${SIZE_MB}mb.bin"
+SIZE_MIB=${1:-10240}  # Default 10 GiB
+TEST_FILE="/tmp/terces_test_${SIZE_MIB}mib.bin"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  SYMMETRIC ENCRYPTION TEST (${SIZE_MB}MB)"
+echo "  SYMMETRIC ENCRYPTION TEST (${SIZE_MIB} MiB)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo -e "\n[1/6] Creating test file..."
-dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MB" status=progress 2>&1
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MIB" status=progress 2>&1
 
 echo -e "\n[2/6] Computing original checksum..."
 ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
@@ -30,7 +30,7 @@ echo -e "\n[5/6] Decrypting (touch your key)..."
 
 echo -e "\n[6/6] Verifying checksum..."
 # Find decrypted file (might have _uuid suffix)
-DEC_FILE=$(find /tmp -maxdepth 1 -name "terces_test_${SIZE_MB}mb*.bin" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2)
+DEC_FILE=$(find /tmp -maxdepth 1 -name "terces_test_${SIZE_MIB}mib*.bin" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2)
 DEC_SUM=$(sha256sum "$DEC_FILE" | cut -d' ' -f1)
 echo "SHA256: ${DEC_SUM:0:16}..."
 

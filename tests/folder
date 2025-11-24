@@ -6,26 +6,26 @@ SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 TERCES="$SCRIPT_DIR/terces"
 
 NUM_FILES=${1:-50}       # Default 50 files
-SIZE_MB=${2:-20}         # Default 20MB per file
+SIZE_MIB=${2:-20}        # Default 20 MiB per file
 TEST_DIR="/tmp/terces_testfolder"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  FOLDER ENCRYPTION TEST (${NUM_FILES} x ${SIZE_MB}MB)"
+echo "  FOLDER ENCRYPTION TEST (${NUM_FILES} x ${SIZE_MIB} MiB)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # Cleanup any previous test
 rm -rf "$TEST_DIR" "${TEST_DIR}.tar.trcs"
 mkdir -p "$TEST_DIR"
 
-echo -e "\n[1/6] Creating ${NUM_FILES} test files (${SIZE_MB}MB each)..."
+echo -e "\n[1/6] Creating ${NUM_FILES} test files (${SIZE_MIB} MiB each)..."
 for i in $(seq 1 "$NUM_FILES"); do
-    dd if=/dev/urandom of="${TEST_DIR}/file_${i}.bin" bs=1M count="$SIZE_MB" status=none
+    dd if=/dev/urandom of="${TEST_DIR}/file_${i}.bin" bs=1M count="$SIZE_MIB" status=none
     printf "\r  Created %d/%d files" "$i" "$NUM_FILES"
 done
 echo ""
 
-TOTAL_SIZE=$((NUM_FILES * SIZE_MB))
-echo "  Total: ${TOTAL_SIZE}MB across ${NUM_FILES} files"
+TOTAL_SIZE=$((NUM_FILES * SIZE_MIB))
+echo "  Total: ${TOTAL_SIZE} MiB across ${NUM_FILES} files"
 
 echo -e "\n[2/6] Computing original checksums..."
 ORIG_SUM=$(find "$TEST_DIR" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)

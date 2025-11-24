@@ -5,11 +5,11 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 TERCES="$SCRIPT_DIR/terces"
 
-SIZE_MB=${1:-10240}  # Default 10GB
-TEST_FILE="/tmp/terces_asym_test_${SIZE_MB}mb.bin"
+SIZE_MIB=${1:-10240}  # Default 10 GiB
+TEST_FILE="/tmp/terces_asym_test_${SIZE_MIB}mib.bin"
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  ASYMMETRIC ENCRYPTION TEST (${SIZE_MB}MB)"
+echo "  ASYMMETRIC ENCRYPTION TEST (${SIZE_MIB} MiB)"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 echo -e "\n[1/7] Getting public key (touch your key)..."
@@ -17,7 +17,7 @@ PUBKEY=$("$TERCES" keypub 2>/dev/null | tail -1)
 echo "Pubkey: ${PUBKEY:0:16}..."
 
 echo -e "\n[2/7] Creating test file..."
-dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MB" status=progress 2>&1
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MIB" status=progress 2>&1
 
 echo -e "\n[3/7] Computing original checksum..."
 ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)

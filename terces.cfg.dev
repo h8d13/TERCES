@@ -47,9 +47,9 @@
 
 // compression: "lz4" | "zstd" | "gzip" | "none"
 //   Folder compression algorithm for 'terces file enc <folder>'
-//   "lz4"  = fastest (~700 MB/s), lower compression (requires lz4 binary)
-//   "zstd" = fast (~400 MB/s), good compression (requires zstd binary)
-//   "gzip" = slower (~50 MB/s), fallback if others not installed
+//   "lz4"  = fastest (~700 MiB/s), lower compression (requires lz4 binary)
+//   "zstd" = fast (~400 MiB/s), good compression (requires zstd binary)
+//   "gzip" = slower (~50 MiB/s), fallback if others not installed
 //   "none" = no compression, instant but larger files
 
 # Do check Yann Collet's work on compression! https://github.com/Cyan4973

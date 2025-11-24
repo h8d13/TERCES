@@ -80,7 +80,7 @@ def unshare_file(file_path: str, label: str = ""):
                 dst.write(dec)
                 processed += 4 + 12 + length
                 pct = (processed / size) * 100
-                print(f"\r[UNSHARE] {processed // (1024*1024)}MB / {size // (1024*1024)}MB ({pct:.0f}%)", end="", file=sys.stderr)
+                print(f"\r[UNSHARE] {processed // (1024*1024)} MiB / {size // (1024*1024)} MiB ({pct:.0f}%)", end="", file=sys.stderr)
 
             print(file=sys.stderr)
 
@@ -91,7 +91,7 @@ def unshare_file(file_path: str, label: str = ""):
 
     elapsed = time.time() - t0
     mbs = (size / 1024 / 1024) / elapsed if elapsed > 0 else 0
-    _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MB/s)")
+    _success(f"Decrypted: {out_path} ({elapsed:.1f}s, {mbs:.0f} MiB/s)")
     return True
 
 
