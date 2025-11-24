@@ -1,11 +1,8 @@
 # handlers.py - Colored output and all directed to stderr because we need pipes
 # _error exits
-# _debug conditional
+# _debug (can be extended to be turned off)
 # _suceess and _nf_warn just print
 import sys
-
-from .config import CFG
-
 RED = "\033[91m"
 YELLOW = "\033[93m"
 GREEN = "\033[92m"
@@ -23,6 +20,5 @@ def _error(message):
     sys.exit(1)
 
 def _debug(message):
-    if CFG.get("debug", False):
-        print(f"{BLUE}[DEBUG]{RESET} {message}", file=sys.stderr)
+    print(f"{BLUE}[DEBUG]{RESET} {message}", file=sys.stderr)
 

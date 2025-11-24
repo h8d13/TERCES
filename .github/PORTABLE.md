@@ -7,6 +7,8 @@ cp path/to/mappings /path/to/usb/mappings
 # perform the same inversly on the target
 ```
 
+And make sure to configure `terces.cfg` to match rp_id field see examples 
+
 Or we also provide some utils to customize or transport encrypted.
 
 ### Already setup on one machine
