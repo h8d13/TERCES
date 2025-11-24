@@ -131,8 +131,8 @@ Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault
 Encrypt/decrypt files using FIDO2 hmac-secret derived keys.
 
 ```bash
-./terces file enc /path/to/file      # Creates file.trcs
-./terces file dec /path/to/file.trcs # Restores original
+./terces file enc /path/to/file       # Creates file.trcs
+./terces file dec /path/to/file.trcs  # Restores original
 ```
 
 >[!IMPORTANT]
@@ -143,11 +143,11 @@ Encrypt/decrypt files using FIDO2 hmac-secret derived keys.
 ### Sharing (Asymmetric)
 
 ```bash
-./terces keypub                    # Export your public key
-./terces keypub <label>            # Different keypair per label
-./terces share <file> <pubkey>     # Encrypt for recipient
-./terces unshare <file.shrd>       # Decrypt with your FIDO2
-./terces unshare <file.shrd> <label> # Decrypt with labeled keypair
+./terces keypub                       # Export your public key
+./terces keypub <label>               # Different keypair per label
+./terces share <file> <pubkey>        # Encrypt for recipient
+./terces unshare <file.shrd>          # Decrypt with your FIDO2
+./terces unshare <file.shrd> <label>  # Decrypt with labeled keypair
 ```
 
 >[!NOTE]
