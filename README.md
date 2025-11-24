@@ -9,6 +9,10 @@ FIDO2 Hardware Security Module key-manager. Interfaces directly with `CTAP2` pro
 
 Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (Google), **SoloKey** (US based open-source), **Nitrokey** (German leader in HSM), ...
 
+1. Cloud < hardware only
+2. Guided but enforced hardware binding
+3. Earns you time, sudoless sudo, etc 
+
 In case your distro doesn't package directly:
 
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version for any init system.
