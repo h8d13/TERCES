@@ -82,7 +82,7 @@ You can use:
 ./terces update    # Clones fresh copy to different folder
 ```
 >[!TIP]
-> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside dir `.d/terces-0003`
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where TERCES/ lives as: `.d/terces-0003`
 
 ---
 
