@@ -42,8 +42,8 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 ./terces encrypt            # Store secret (prompts: name, secret, optional description)
 ./terces decrypt            # Retrieve secret (prompts: name)
 ./terces gen [len] [name]   # Generate password (optional: length, store as name)
-./terces vault              # List stored secrets
-./terces delete <name>      # Delete a secret
+./terces vault              # List stored secrets in vault
+./terces delete <name>      # Delete a secret from vault
 ./terces reset              # Deletes all locally stored keys
 ```
 
