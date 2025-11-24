@@ -131,7 +131,7 @@ Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works f
 <summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
 
 
-**Standard operations**
+### **Standard operations**
 
 Dell enterprise laptop (NVMe M.2 SSD):
 
@@ -143,7 +143,7 @@ Dell enterprise laptop (NVMe M.2 SSD):
 | **Share** | 2 GiB | 1097 MB/s |
 | **Unshare** | 2 GiB | 1297 MB/s |
 
-**Folder compression** 
+### **Folder compression** cascades
 
 Using 100 files of 20MiB each `/dev/urandom`
 
