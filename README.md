@@ -24,6 +24,8 @@ Set-up on arch:
 ```bash
 ./terces list           # List devices
 ./terces info <term>    # Example "algo", empty for full info
+./terces help           # Show all commands
+
 ```
 
 ## Usage 🤫
@@ -32,11 +34,13 @@ Set-up on arch:
 > Find mapping path in `terces.cfg`
 
 ```bash
-./terces setup      # Generate mappings file
-./terces unlock     # Test auth
-./terces encrypt    # Store secret (prompts: name, secret, optional description)
-./terces decrypt    # Retrieve secret (prompts: name)
-./terces reset      # Deletes all locally stored keys
+./terces setup              # Generate mappings file
+./terces unlock             # Test auth
+./terces encrypt            # Store secret (prompts: name, secret, optional description)
+./terces decrypt            # Retrieve secret (prompts: name)
+./terces secrets            # List stored secrets
+./terces delete <name>      # Delete a secret
+./terces reset              # Deletes all locally stored keys
 ```
 
 >[!TIP]
