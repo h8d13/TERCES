@@ -164,7 +164,9 @@ Using 100 files of 20MiB each `/dev/urandom`
 
 ## Installing
 
-- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. See reference table: [DevConfig](./terces.cfg.dev)
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. 
+
+See reference table: [DevConfig](./terces.cfg.dev)
 
 - Running from Python in isolated venv
 
