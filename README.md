@@ -22,7 +22,7 @@ Set-up on arch (which asumes `base-devel git tar openssl`):
 
 ---
 
-## FIDO2 Hardware:
+## FIDO2 Hardware
 
 ```bash
 ./terces list           # List devices
