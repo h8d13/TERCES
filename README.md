@@ -10,6 +10,7 @@ FIDO2 Hardware Security Module symetric key manager. Interfaces directly with `C
 In case your distro doesn't package directly:
 
 - [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version. 
+- And integrate to `pam.d` for system-login, login-manager, etc...
 
 > Helps you integrate with system even if not packaged by your distro, if it is:
 
