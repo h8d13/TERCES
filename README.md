@@ -138,6 +138,20 @@ Encrypt/decrypt files using FIDO2 hmac-secret derived keys.
 >[!IMPORTANT]
 > Key is derived from `key_handle + filename`  Renaming `.trcs` files breaks decryption.
 > Protects for attacker would need to know both filename AND your *specific* credentials.
-> This also strips any old metadata as it would only contain `ciphertext` + `nonce` 
+> This also strips any old metadata as it would only contain `ciphertext` + `nonce`
+
+### Sharing (Asymmetric)
+
+```bash
+./terces keypub                # Export your public key
+# Alice wants to receive files she generates a pk and gives it to Bob
+./terces share <file> <pubkey> # Encrypt for recipient
+# Bob encrypts files FOR Alice with her pubkey
+./terces unshare <file.shrd> # Decrypt with your FIDO2
+# Alice can then decrypt using her U2F device
+```
+
+>[!NOTE]
+> Sender doesn't need FIDO2. Only recipient can decrypt.
 
 ---
