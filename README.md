@@ -170,7 +170,7 @@ You can place `TERCES/` anywhere on the system or removable media
 
 Then create a symlink either: Check paths: `echo $PATH`
 
-`ln -s /path/to/TERCES/terces ~/.local/bin/terces` or any other `bin/terces` location.
+`sudo ln -s /home/johndoe/TECRES/terces /usr/local/bin/terces` or any other `bin/terces` location.
 
 Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
 

@@ -1,22 +1,23 @@
-#!/bin/bash
+#!/usr/bin/env bash
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")" && pwd)"
 REPO="https://github.com/h8d13/TERCES"
 VERSION_FILE="version"
 
 [[ "$1" =~ ^(list|info|setup|unlock|encrypt|decrypt|vault|delete|reset|version|update|portable|ssh|file|keypub|share|unshare|gen|test|help)$ ]] || { echo "Usage: $0 help"; exit 1; }
 
-[[ "$1" == "reset" ]] && { rm -rf .d/ && echo "Cleared all data."; exit 0; }
-[[ "$1" == "test" ]] && { ./tests/"${2:-large}" "${@:3}"; exit $?; }
+[[ "$1" == "reset" ]] && { rm -rf "$SCRIPT_DIR/.d/" && echo "Cleared all data."; exit 0; }
+[[ "$1" == "test" ]] && { "$SCRIPT_DIR/tests/${2:-large}" "${@:3}"; exit $?; }
 
 # Get local version from .d/terces-XXXX directory name
 get_local_ver() {
     local dir
-    dir=$(find ".d" -maxdepth 1 -type d -name 'terces-*' 2>/dev/null | head -1)
+    dir=$(find "$SCRIPT_DIR/.d" -maxdepth 1 -type d -name 'terces-*' 2>/dev/null | head -1)
     [[ -n "$dir" ]] && basename "$dir" | sed 's/terces-//' || echo "none"
 }
 
 [[ "$1" == "version" ]] && {
     local_ver=$(get_local_ver)
-    code_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
+    code_ver=$(cat "$SCRIPT_DIR/$VERSION_FILE" 2>/dev/null || echo "0000")
     local_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
     echo "Code:    TERCES-$code_ver ($local_hash)"
     echo "Data:    .d/terces-$local_ver"
@@ -28,7 +29,7 @@ get_local_ver() {
 
 [[ "$1" == "update" ]] && {
     local_ver=$(get_local_ver)
-    code_ver=$(cat "$VERSION_FILE" 2>/dev/null || echo "0000")
+    code_ver=$(cat "$SCRIPT_DIR/$VERSION_FILE" 2>/dev/null || echo "0000")
     cur_hash=$(git rev-parse --short HEAD 2>/dev/null || echo "none")
 
     tmp_dir=$(mktemp -d)
@@ -72,5 +73,5 @@ get_local_ver() {
     exit 0
 }
 
-python -B z/"$1".py "${@:2}"
+python -B "$SCRIPT_DIR/z/$1.py" "${@:2}"
 
