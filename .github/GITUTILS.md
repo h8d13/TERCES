@@ -5,6 +5,8 @@
 - `eval "$(ssh-agent -s)"`
 - `ssh-add ~/.ssh/id_keyname_sk` or using keychain package: `eval $(keychain --eval --quiet id_keyname_sk)`
 
+Again I have this as an alias or even in my open VSCodium command^^
+
 Also useful: 
 
 - `ssh -vT git@github.com 2>&1 | grep "Offering"`
