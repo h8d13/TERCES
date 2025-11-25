@@ -1,0 +1,92 @@
+#!/bin/bash
+# ZKP Authentication Flow Example
+# Shows the complete client-server authentication flow
+
+# =============================================================================
+# SETUP: Start server first
+# =============================================================================
+# Terminal 1: python3 tests/zkp_server.py
+
+# =============================================================================
+# STEP 1: CLIENT - Generate keypair
+# =============================================================================
+# Production (with FIDO2):
+#   sudo terces zkp init
+#   sudo terces zkp export > /tmp/pubkey.json
+#   PUBLIC_KEY=$(jq -r .public_key /tmp/pubkey.json)
+
+# Testing (without FIDO2):
+SECRET=31170066671130966917919416448033679716751639138561145911291343791243582146638
+python3 z/nzkp_test.py keygen $SECRET
+
+# Copy the "Public (full):" number from output
+PUBLIC_KEY=6813019536279576901808199778677335855884527623896200796752525724592640510351886760847135137015885167252265275084198080901119464810339267357802047877846797892506822021710520276117238353331701997972464306942215553853922664667952642729311382167915847288697921899111587324013056683579498443665105764706183114962546589200717069040121399118684660861027614046752130411830191607233140504697699984847407958039321762751877189454034172232750982421332930540959821015261791464910178406923996406095651925917631816642559672505974582785182907725130824021333745400696340870009952013823186720337952845215849396245207213067508310221117
+
+# =============================================================================
+# STEP 2: CLIENT → SERVER - Register public key
+# =============================================================================
+curl -X POST http://localhost:8080/register \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"user_id\": \"alice\",
+    \"public_key\": \"$PUBLIC_KEY\",
+    \"bits\": 2048
+  }"
+
+# Server stores: users["alice"] = {public_key: ..., bits: 2048}
+
+# =============================================================================
+# STEP 3: CLIENT - Generate proof of identity
+# =============================================================================
+# Production (with FIDO2):
+#   sudo terces zkp prove > /tmp/proof.json
+
+# Testing (without FIDO2):
+python3 z/nzkp_test.py prove $SECRET > /tmp/proof.json
+
+echo "Proof generated:"
+cat /tmp/proof.json
+
+# =============================================================================
+# STEP 4: CLIENT → SERVER - Login (send proof, get session token)
+# =============================================================================
+curl -X POST http://localhost:8080/login \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"user_id\": \"alice\",
+    \"proof\": $(cat /tmp/proof.json)
+  }" > /tmp/session.json
+
+echo "Session token received:"
+cat /tmp/session.json
+
+# Server:
+#   1. Verifies proof against stored public key
+#   2. Issues session token (packed 28-char base64 with checksum)
+#   3. Stores: sessions[token] = {proof, nonce, user_id, use_count: 0}
+
+# Extract token for later use
+TOKEN=$(jq -r .token /tmp/session.json)
+echo "Token: $TOKEN"
+
+# =============================================================================
+# STEP 5: CLIENT → SERVER - Use session token (no proof needed)
+# =============================================================================
+curl -X POST http://localhost:8080/verify \
+  -H "Content-Type: application/json" \
+  -d "{\"token\": \"$TOKEN\"}"
+
+# Server:
+#   1. Looks up stored session by token
+#   2. Verifies token checksum (trit-based)
+#   3. Checks TTL (300s default)
+#   4. Checks use_count if max_uses set
+#   5. Increments use_count
+
+# =============================================================================
+# STEP 6: Test tampered token (should fail checksum)
+# =============================================================================
+curl -X POST http://localhost:8080/verify \
+  -H "Content-Type: application/json" \
+  -d '{"token": "AAAAAAAAAAAAAAAAAAAAAAAAAAAA"}'
+

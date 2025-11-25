@@ -110,33 +110,98 @@ def derive_key_scrypt(password, salt=None, n=2**14, r=8, p=1, dklen=32):
 class TZKP:
     def __init__(self, trits=None):
         self.trits = trits or []
-    
+
     @classmethod
-    def from_int(cls, n):
+    def from_int(cls, n, with_checksum=False):
         if n == 0:
-            return cls([0])
-        
-        trits = []
-        while n:
-            if n % 3 == 0:
-                trits.append(0)
-                n //= 3
-            elif n % 3 == 1:
-                trits.append(1)
-                n //= 3
-            else:
-                trits.append(-1)
-                n = (n + 1) // 3
-        
+            trits = [0]
+        else:
+            trits = []
+            while n:
+                if n % 3 == 0:
+                    trits.append(0)
+                    n //= 3
+                elif n % 3 == 1:
+                    trits.append(1)
+                    n //= 3
+                else:
+                    trits.append(-1)
+                    n = (n + 1) // 3
+
+        if with_checksum:
+            checksum_value = sum(trits) % 3
+            # Map {0, 1, 2} → {0, 1, -1} (valid trit space)
+            checksum_trit = [0, 1, -1][checksum_value]
+            trits.append(checksum_trit)
+
         return cls(trits)
-    
-    def to_int(self):
-        result = 0
-        for i, trit in enumerate(self.trits):
-            result += trit * (3 ** i)
-        return result
-    
+
+    @classmethod
+    def from_packed(cls, packed_str):
+        """Decode from packed base64 format"""
+        import base64
+        data = base64.urlsafe_b64decode(packed_str.encode('ascii'))
+
+        # Read trit count from first 2 bytes
+        trit_count = (data[0] << 8) | data[1]
+        trits = []
+
+        # Unpack 5 trits per byte
+        for byte in data[2:]:
+            value = byte
+            for _ in range(5):
+                trit_shifted = value % 3
+                trit = trit_shifted - 1
+                trits.append(trit)
+                value //= 3
+
+        return cls(trits[:trit_count])
+
+    def to_int(self, verify_checksum=False):
+        if verify_checksum:
+            if len(self.trits) < 2:
+                raise ValueError("No checksum present")
+
+            data_trits = self.trits[:-1]
+            claimed_checksum = self.trits[-1]
+            checksum_value = sum(data_trits) % 3
+            # Map {0, 1, 2} → {0, 1, -1}
+            expected_checksum = [0, 1, -1][checksum_value]
+
+            if claimed_checksum != expected_checksum:
+                raise ValueError("Checksum verification failed")
+
+            # Convert without checksum trit
+            result = 0
+            for i, trit in enumerate(data_trits):
+                result += trit * (3 ** i)
+            return result
+        else:
+            result = 0
+            for i, trit in enumerate(self.trits):
+                result += trit * (3 ** i)
+            return result
+
+    def to_packed(self):
+        """Encode to packed base64 format (5 trits per byte)"""
+        import base64
+
+        # Store trit count in first 2 bytes
+        trit_count = len(self.trits)
+        bytes_data = [trit_count >> 8, trit_count & 0xFF]
+
+        # Pack 5 trits per byte
+        for i in range(0, len(self.trits), 5):
+            chunk = self.trits[i:i+5]
+            value = 0
+            for j, trit in enumerate(chunk):
+                value += (trit + 1) * (3 ** j)
+            bytes_data.append(value)
+
+        return base64.urlsafe_b64encode(bytes(bytes_data)).decode('ascii')
+
     def __str__(self):
+        """Human-readable format"""
         if not self.trits:
             return "0"
         return ''.join(str(t).replace('-1', 'T') for t in reversed(self.trits))
@@ -194,38 +259,43 @@ class PrimeTimeTZKP:
             "timestamp": timestamp
         }
     
-    def generate_session_token(self, secret, user_id, nonce=None):
+    def issue_session_token(self, verified_proof, user_id, nonce=None, max_uses=None):
         """
-        Generate a session token with embedded ZKP proof.
+        Server-side: Issue a session token after verifying a client proof.
 
         Args:
-            secret: The ZKP secret
+            verified_proof: Already-verified proof dict from client
             user_id: User identifier
             nonce: Optional nonce (auto-generated if None)
+            max_uses: Optional max verification count (None = unlimited)
 
         Returns:
-            Dict with token, proof, and session data
+            Dict with token and session data to store
         """
         if nonce is None:
             nonce = secrets.token_hex(16)
 
-        proof = self.prove_knowledge(secret)
-
-        # Combine proof with session data
-        combined = f"{proof['commitment']}{proof['challenge']}{user_id}{nonce}{proof['timestamp']}"
+        # Generate token from proof + session data
+        combined = f"{verified_proof['commitment']}{verified_proof['challenge']}{user_id}{nonce}{verified_proof['timestamp']}"
         hash_val = hashlib.sha512(combined.encode()).hexdigest()
         hash_int = int(hash_val, 16)
 
-        # 81 trits = ~128 bits entropy
-        token_int = hash_int % (3 ** 81)
-        token_id = TZKP.from_int(token_int)
+        # 80 trits for data + 1 checksum trit = 81 total
+        token_int = hash_int % (3 ** 80)
+        token_id = TZKP.from_int(token_int, with_checksum=True)
 
-        return {
-            "token": str(token_id),
-            "proof": proof,
+        session_data = {
+            "token": token_id.to_packed(),
+            "proof": verified_proof,
             "nonce": nonce,
             "user_id": user_id
         }
+
+        if max_uses is not None:
+            session_data["max_uses"] = max_uses
+            session_data["use_count"] = 0
+
+        return session_data
     
     def verify_proof(self, public_key, proof_data):
         # Check timestamp validity
@@ -252,114 +322,50 @@ class PrimeTimeTZKP:
         else:
             return False, "Invalid proof"
 
-def cmd_keygen():
-    if len(sys.argv) < 3:
-        print("Usage: tzkp.py keygen <secret_number>")
-        return
+    def verify_session_token(self, public_key, token_str, stored_proof, stored_nonce, stored_user_id, use_count=None, max_uses=None):
+        """
+        Verify a session token against stored session data.
+        Client sends only the token, server looks up stored session data.
 
-    secret = int(sys.argv[2])
+        Args:
+            public_key: The public key to verify against
+            token_str: The trit-encoded token string from client
+            stored_proof: The proof dict stored server-side when session was created
+            stored_nonce: The nonce stored server-side
+            stored_user_id: The user_id stored server-side
+            use_count: Current use count (optional, for rate limiting)
+            max_uses: Maximum allowed uses (optional)
 
-    entropy_bits, is_ok, warning = check_entropy(secret)
-    print(f"Entropy: {entropy_bits:.1f} bits")
-    if warning:
-        print(warning)
-        if not is_ok:
-            print("Aborting: insufficient entropy")
-            return
+        Returns:
+            (bool, str): (valid, message)
+        """
+        # Check use count limit
+        if max_uses is not None and use_count is not None:
+            if use_count >= max_uses:
+                return False, f"Token use limit exceeded ({use_count}/{max_uses})"
 
-    zkp = PrimeTimeTZKP()
-    secret_trits, public_trits, public_key = zkp.generate_keypair(secret)
+        # First verify the stored ZKP proof
+        proof_valid, proof_msg = self.verify_proof(public_key, stored_proof)
+        if not proof_valid:
+            return False, f"Stored proof invalid: {proof_msg}"
 
-    print(f"Secret: {secret} -> {secret_trits}")
-    print(f"Public (trit): {public_trits}")
-    print(f"Public (full): {public_key}")
+        # Reconstruct the expected token from stored session data
+        combined = f"{stored_proof['commitment']}{stored_proof['challenge']}{stored_user_id}{stored_nonce}{stored_proof['timestamp']}"
+        hash_val = hashlib.sha512(combined.encode()).hexdigest()
+        hash_int = int(hash_val, 16)
+        expected_token_int = hash_int % (3 ** 80)
 
+        # Decode and verify client's packed token
+        try:
+            token_tzkp = TZKP.from_packed(token_str)
+            actual_token_int = token_tzkp.to_int(verify_checksum=True)
+        except ValueError as e:
+            return False, f"Token validation failed: {e}"
+        except Exception as e:
+            return False, f"Failed to decode token: {e}"
 
-def cmd_derive():
-    if len(sys.argv) < 3:
-        print("Usage: tzkp.py derive <password> [salt_hex]")
-        return
-
-    password = sys.argv[2]
-    salt = sys.argv[3] if len(sys.argv) > 3 else None
-
-    entropy_bits, is_ok, warning = check_entropy(password)
-    print(f"Password entropy: {entropy_bits:.1f} bits")
-    if warning:
-        print(warning)
-
-    derived_key, salt_hex = derive_key_scrypt(password, salt)
-    print(f"Salt: {salt_hex}")
-    print(f"Derived key: {derived_key}")
-
-    zkp = PrimeTimeTZKP()
-    secret_trits, public_trits, public_key = zkp.generate_keypair(derived_key)
-    print(f"Public (trit): {public_trits}")
-    print(f"Public (full): {public_key}")
-
-def cmd_prove():
-    if len(sys.argv) < 3:
-        print("Usage: tzkp.py prove <secret_number>")
-        return
-    
-    secret = int(sys.argv[2])
-    zkp = PrimeTimeTZKP()
-    
-    proof = zkp.prove_knowledge(secret)
-    print(json.dumps(proof, indent=2))
-
-def cmd_session_token():
-    if len(sys.argv) < 4:
-        print("Usage: tzkp.py session-token <secret> <user_id> [nonce]")
-        return
-
-    secret = int(sys.argv[2])
-    user_id = sys.argv[3]
-    nonce = sys.argv[4] if len(sys.argv) > 4 else None
-    zkp = PrimeTimeTZKP()
-
-    result = zkp.generate_session_token(secret, user_id, nonce)
-    print(json.dumps(result, indent=2))
-
-def cmd_verify():
-    if len(sys.argv) < 4:
-        print("Usage: zkp verify <public_key> <proof_json>")
-        return
-    
-    public_key = int(sys.argv[2])
-    proof_json = sys.argv[3]
-    
-    zkp = PrimeTimeTZKP()
-    proof_data = json.loads(proof_json)
-    
-    valid, message = zkp.verify_proof(public_key, proof_data)
-    print(f"{'VALID' if valid else 'INVALID'}: {message}")
-
-def main():
-    if len(sys.argv) < 2:
-        print("PTZKP - Prime Time Zero-Knowledge Proof")
-        print()
-        print("Commands:")
-        print("  keygen <secret>              - Generate keypair (entropy checked)")
-        print("  derive <password> [salt]     - Derive key via scrypt")
-        print("  prove <secret>               - Generate time-bound proof")
-        print("  session-token <secret> <uid> - Generate session token")
-        print("  verify <public> '<proof>'    - Verify proof")
-        return
-
-    cmd = sys.argv[1]
-    if cmd == "keygen":
-        cmd_keygen()
-    elif cmd == "derive":
-        cmd_derive()
-    elif cmd == "prove":
-        cmd_prove()
-    elif cmd == "session-token":
-        cmd_session_token()
-    elif cmd == "verify":
-        cmd_verify()
-    else:
-        print(f"Unknown command: {cmd}")
-
-if __name__ == "__main__":
-    main()
+        # Verify client token matches expected value
+        if actual_token_int == expected_token_int:
+            return True, "Valid session token"
+        else:
+            return False, "Token mismatch - invalid or tampered"

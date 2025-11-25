@@ -172,17 +172,87 @@ def cmd_verify_remote(proof_json, pubkey_json):
         _error(f"INVALID: {message}")
 
 
+def cmd_issue_session_token(proof_json, user_id):
+    """Server-side: Issue session token after verifying client proof"""
+    auth = U2FKey()
+
+    # Load stored public key
+    keypair_json = auth.decrypt_secret(ZKP_VAULT_KEY)
+    if not keypair_json:
+        _error(f"No {ZKP_VAULT_KEY}. Run 'zkp init' first.")
+        return
+
+    keypair = json.loads(keypair_json)
+    public_key = int(keypair["public_key"])
+    bits = keypair.get("bits", 2048)
+
+    # Parse and verify proof
+    try:
+        proof = json.loads(proof_json)
+    except json.JSONDecodeError:
+        _error("Invalid JSON proof")
+        return
+
+    zkp = PrimeTimeTZKP(bits)
+    valid, message = zkp.verify_proof(public_key, proof)
+    if not valid:
+        _error(f"Proof verification failed: {message}")
+        return
+
+    # Issue session token
+    session = zkp.issue_session_token(proof, user_id)
+    print(json.dumps(session, indent=2))
+
+
+def cmd_verify_session_token(token_str, session_json):
+    """Verify session token against stored session data"""
+    auth = U2FKey()
+
+    # Load stored public key
+    keypair_json = auth.decrypt_secret(ZKP_VAULT_KEY)
+    if not keypair_json:
+        _error(f"No {ZKP_VAULT_KEY}. Run 'zkp init' first.")
+        return
+
+    keypair = json.loads(keypair_json)
+    public_key = int(keypair["public_key"])
+    bits = keypair.get("bits", 2048)
+
+    # Parse session data
+    try:
+        session = json.loads(session_json)
+    except json.JSONDecodeError:
+        _error("Invalid JSON session data")
+        return
+
+    zkp = PrimeTimeTZKP(bits)
+    valid, message = zkp.verify_session_token(
+        public_key,
+        token_str,
+        session["proof"],
+        session["nonce"],
+        session["user_id"]
+    )
+
+    if valid:
+        _success(f"VALID: {message}")
+    else:
+        _error(f"INVALID: {message}")
+
+
 def main():
     if len(sys.argv) < 2:
         print("ZKP - Zero-Knowledge Proof Authentication")
         print()
         print("Commands:")
-        print("  init [bits]           - Initialize keypair (2048/3072/4096)")
-        print("  prove [ttl]           - Generate time-bound proof")
-        print("  verify '<proof>'      - Verify proof")
-        print("  info                  - Show public key info")
-        print("  export                - Export public key for remote use")
-        print("  verify-remote '<proof>' '<pubkey>' - Verify without vault")
+        print("  init [bits]                             - Initialize keypair (2048/3072/4096)")
+        print("  prove [ttl]                             - Generate time-bound proof")
+        print("  verify '<proof>'                        - Verify proof")
+        print("  info                                    - Show public key info")
+        print("  export                                  - Export public key for remote use")
+        print("  verify-remote '<proof>' '<pubkey>'      - Verify without vault")
+        print("  issue-session-token '<proof>' <user_id> - Issue session token (server)")
+        print("  verify-session-token '<token>' '<sess>' - Verify session token")
         return
 
     cmd = sys.argv[1]
@@ -215,6 +285,18 @@ def main():
             _error("Usage: zkp verify-remote '<proof_json>' '<pubkey_json>'")
             return
         cmd_verify_remote(sys.argv[2], sys.argv[3])
+
+    elif cmd == "issue-session-token":
+        if len(sys.argv) < 4:
+            _error("Usage: zkp issue-session-token '<proof_json>' <user_id>")
+            return
+        cmd_issue_session_token(sys.argv[2], sys.argv[3])
+
+    elif cmd == "verify-session-token":
+        if len(sys.argv) < 4:
+            _error("Usage: zkp verify-session-token '<token>' '<session_json>'")
+            return
+        cmd_verify_session_token(sys.argv[2], sys.argv[3])
 
     else:
         _error(f"Unknown command: {cmd}")
