@@ -1,8 +1,8 @@
 # Terces
 
 <picture>
-  <source srcset="./.gitlab/assets/usb_d.svg" media="(prefers-color-scheme: dark)">
-  <img align="left" src="./.gitlab/assets/usb_l.svg" width="80" alt="usb lock icon">
+  <source srcset="./.github/assets/usb_d.svg" media="(prefers-color-scheme: dark)">
+  <img align="left" src="./.github/assets/usb_l.svg" width="80" alt="usb lock icon">
 </picture>
 
 FIDO2 Hardware Security Module key-manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to PIN is **63 chars UTF-8**. 
