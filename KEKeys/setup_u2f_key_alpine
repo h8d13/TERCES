@@ -1,0 +1,36 @@
+#!/bin/sh
+# Alpine Linux setup script for pam-u2f
+# Based on Gentoo docs and adapted for Alpine
+# https://wiki.gentoo.org/wiki/YubiKey/PAM
+
+set -e
+
+# Detect sudo or doas
+if command -v sudo >/dev/null 2>&1; then
+    ELEV="sudo"
+elif command -v doas >/dev/null 2>&1; then
+    ELEV="doas"
+else
+    echo "[-] Neither sudo nor doas found. Please install one."
+    exit 1
+fi
+
+# ---- Build in /tmp to avoid unsafe directory names ----
+BUILD_DIR="/tmp/pam-u2f-build"
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+git clone https://gitlab.com/Yubico/pam-u2f.git
+cd pam-u2f
+
+autoreconf --install
+./configure --with-pam-dir=/lib/security
+make
+$ELEV make install
+cd /
+rm -rf "$BUILD_DIR"
+
+echo "pam-u2f installation complete."
+echo "After edit /etc/pam.d/system-auth and other PAM configs accordingly."
+echo "See pam.d.example for configuration examples."

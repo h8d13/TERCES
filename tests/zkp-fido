@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# Test ZKP with FIDO2 integration (requires hardware key)
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
+
+BITS=${1:-2048}
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ZKP FIDO2 INTEGRATION TEST (${BITS}-bit)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo ""
+echo "  This test requires a FIDO2 hardware key."
+echo "  You will be prompted for PIN and touch."
+echo ""
+
+echo -e "\n[1/5] Initializing ZKP keypair (touch your key)..."
+"$TERCES" zkp init "$BITS"
+
+echo -e "\n[2/5] Checking stored keypair info..."
+"$TERCES" zkp info
+
+echo -e "\n[3/5] Generating proof (touch your key)..."
+PROOF=$("$TERCES" zkp prove 300)
+echo "Proof generated:"
+echo "$PROOF" | head -6
+
+echo -e "\n[4/5] Verifying proof..."
+VERIFY_OUT=$("$TERCES" zkp verify "$PROOF" 2>&1)
+echo "$VERIFY_OUT"
+
+if echo "$VERIFY_OUT" | grep -q "VALID"; then
+    echo -e "\nPASS - Proof verified"
+else
+    echo -e "\nFAIL - Proof verification failed!"
+    exit 1
+fi
+
+echo -e "\n[5/5] Testing export/verify-remote flow..."
+PUBKEY=$("$TERCES" zkp export)
+echo "Exported public key"
+
+# Generate fresh proof
+PROOF2=$("$TERCES" zkp prove 60)
+REMOTE_OUT=$("$TERCES" zkp verify-remote "$PROOF2" "$PUBKEY" 2>&1)
+echo "$REMOTE_OUT"
+
+if echo "$REMOTE_OUT" | grep -q "VALID"; then
+    echo -e "\nPASS - Remote verification works"
+else
+    echo -e "\nFAIL - Remote verification failed!"
+    exit 1
+fi
+
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  ALL ZKP FIDO2 TESTS PASSED"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

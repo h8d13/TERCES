@@ -1,0 +1,25 @@
+#!/bin/bash
+# assumes base-devel and no systemd
+# thnx gentoo docs/users
+# https://wiki.gentoo.org/wiki/YubiKey/PAM
+
+set -e
+
+# ---- Build in /tmp to avoid unsafe directory names ----
+BUILD_DIR="/tmp/pam-u2f-build"
+rm -rf "$BUILD_DIR"
+mkdir -p "$BUILD_DIR"
+cd "$BUILD_DIR"
+
+git clone https://gitlab.com/Yubico/pam-u2f.git
+cd pam-u2f
+
+autoreconf --install
+./configure --with-pam-dir=/usr/lib/security
+make
+make install
+cd /
+rm -rf "$BUILD_DIR"
+
+echo "pam-u2f installation complete."
+echo "After edit /etc/pam.d/system-auth and /etc/pam.d/system-local-login accordingly."

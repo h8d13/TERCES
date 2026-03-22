@@ -1,0 +1,52 @@
+#!/bin/sh
+[ "$(id -u)" -eq 0 ] && echo "[-] Run me as user." && exit 1
+
+# Detect sudo or doas
+if command -v sudo >/dev/null 2>&1; then
+    ELEV="sudo"
+elif command -v doas >/dev/null 2>&1; then
+    ELEV="doas"
+else
+    echo "[-] Neither sudo nor doas found. Please install one."
+    exit 1
+fi
+
+# Alpine package names
+DEPS="git asciidoc libfido2-dev linux-pam-dev alpine-sdk autoconf automake libtool python3 py3-fido2 py3-cryptography"
+# # doas apk add openssh-sk-helper
+
+
+PM="apk"
+PM_ADD_FLAGS="add"
+
+CHECK_DEPS () {
+    echo "[+] Checking for required packages..."
+    missing=""
+    for pkg in $DEPS; do
+        if ! apk info -e "$pkg" >/dev/null 2>&1; then
+            missing="$missing $pkg"
+        fi
+    done
+
+    if [ -z "$missing" ]; then
+        echo "[+] All deps found."
+        return 0
+    else
+        echo "[-] Missing packages:$missing"
+        return 1
+    fi
+}
+
+INSTALL_DEPS () {
+    echo "[+] Installing missing deps."
+    $ELEV $PM $PM_ADD_FLAGS $DEPS
+}
+
+CHECK_DEPS || INSTALL_DEPS
+
+echo "[+] All dependencies installed!"
+echo "[+] Python packages installed via Alpine's package manager (py3-fido2, py3-cryptography)"
+echo ""
+echo "Next steps:"
+echo "  1. Run ./KEKeys/setup_u2f_key_alpine to build pam-u2f"
+echo "  2. Or use ./terces directly for basic operations"

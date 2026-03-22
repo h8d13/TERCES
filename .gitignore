@@ -1,0 +1,9 @@
+lol.jpg
+.d/*
+*.trcs
+*.shrd
+*.json
+.venv/
+.ruff_cache/*
+__pycache__/
+OpenDoas/

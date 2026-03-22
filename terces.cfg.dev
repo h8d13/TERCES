@@ -1,0 +1,58 @@
+{
+  "device_index": null,
+  "rp_id": "pam://hostname",
+  "key_type": null,
+  "resident": false,
+  "pin_verification": false,
+  "user_verification": false,
+  "debug": false,
+  "compression": "zstd"
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// TERCES CONFIGURATION REFERENCE
+// ═══════════════════════════════════════════════════════════════════
+
+// device_index: 0
+//   Which FIDO2 device to use (0 = first detected, increment for multiple)
+
+// key_index: 0
+//   Which key handle to use from mappings file (0 = first, increment for multiple keys)
+
+// rp_id: null | "pam://my-id"
+//   Relying Party ID. null = pam://hostname (not portable)
+//   Set fixed value for portability across machines: "pam://my-id"
+
+// key_type: null | "es256" | "eddsa" | "rs256"
+//   COSE algorithm for credentials
+//   null = device default, "eddsa" needed for Ed25519
+
+// resident: false | true
+//   Store credential ON device (discoverable)
+//   true = portable, works without mappings file
+//   false = credential stored in mappings file only
+
+// pin_verification: false | true
+//   Require PIN during pamu2fcfg setup
+
+// user_verification: false | true
+//   Require user verification (PIN or biometric) during setup
+
+// debug: false | true
+//   Enable [DEBUG] output for all commands
+//   Shows PIN retries, assertion counters, zstd fallback, etc.
+
+// compression: "lz4" | "zstd" | "gzip" | "none"
+//   Folder compression algorithm for 'terces file enc <folder>'
+//   "lz4"  = fastest (~700 MiB/s), lower compression (requires lz4 binary)
+//   "zstd" = fast (~400 MiB/s), good compression (requires zstd binary)
+//   "gzip" = slower (~50 MiB/s), fallback if others not installed
+//   "none" = no compression, instant but larger files
+
+# Do check Yann Collet's work on compression! https://gitlab.com/Cyan4973
+
+// ═══════════════════════════════════════════════════════════════════
+// MAPPINGS FORMAT
+// ═══════════════════════════════════════════════════════════════════
+// username:keyhandle,pubkey,es256,+presence
+// username is cosmetic - doesn't affect authentication

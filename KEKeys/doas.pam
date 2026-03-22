@@ -1,0 +1,9 @@
+# PAM configuration for doas
+# Basic setup with U2F support and password fallback
+
+auth     sufficient pam_rootok.so
+auth     sufficient pam_u2f.so cue authfile=/etc/u2f_mappings
+auth     include    base-auth
+account  include    base-account
+password include    base-password
+session  include    base-session

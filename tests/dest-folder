@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+# Test custom destination for folder encryption/decryption
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
+
+NUM_FILES=${1:-5}        # Default 5 files
+SIZE_MIB=${2:-2}         # Default 2 MiB per file
+TEST_DIR="/tmp/terces_dest_folder"
+ENC_DEST="/tmp/terces_folder_enc_dest"
+DEC_DEST="/tmp/terces_folder_dec_dest"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  FOLDER DESTINATION TEST (${NUM_FILES} x ${SIZE_MIB} MiB)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# Cleanup
+rm -rf "$TEST_DIR" "$ENC_DEST" "$DEC_DEST"
+mkdir -p "$TEST_DIR" "$ENC_DEST" "$DEC_DEST"
+
+echo -e "\n[1/7] Creating ${NUM_FILES} test files (${SIZE_MIB} MiB each)..."
+for i in $(seq 1 "$NUM_FILES"); do
+    dd if=/dev/urandom of="${TEST_DIR}/file_${i}.bin" bs=1M count="$SIZE_MIB" status=none
+    printf "\r  Created %d/%d files" "$i" "$NUM_FILES"
+done
+echo ""
+
+echo -e "\n[2/7] Computing original checksums..."
+ORIG_SUM=$(find "$TEST_DIR" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+echo "Combined SHA256: ${ORIG_SUM:0:16}..."
+
+echo -e "\n[3/7] Encrypting folder to custom dest (touch your key)..."
+"$TERCES" file enc "$TEST_DIR" "$ENC_DEST"
+
+# Verify encrypted file is in dest
+ENC_FILE="$ENC_DEST/terces_dest_folder.tar.trcs"
+if [ ! -f "$ENC_FILE" ]; then
+    echo "FAIL - Encrypted file not found at $ENC_FILE"
+    exit 1
+fi
+echo "  Encrypted file at: $ENC_FILE"
+
+echo -e "\n[4/7] Removing original folder..."
+rm -rf "$TEST_DIR"
+
+echo -e "\n[5/7] Decrypting to custom dest (touch your key)..."
+"$TERCES" file dec "$ENC_FILE" "$DEC_DEST"
+
+echo -e "\n[6/7] Verifying decrypted folder location..."
+DEC_DIR="$DEC_DEST/terces_dest_folder"
+if [ ! -d "$DEC_DIR" ]; then
+    echo "FAIL - Decrypted folder not found at $DEC_DIR"
+    exit 1
+fi
+echo "  Decrypted folder at: $DEC_DIR"
+
+echo -e "\n[7/7] Verifying checksums..."
+DEC_SUM=$(find "$DEC_DIR" -type f -exec sha256sum {} \; | sort | sha256sum | cut -d' ' -f1)
+echo "Combined SHA256: ${DEC_SUM:0:16}..."
+
+echo ""
+if [ "$ORIG_SUM" = "$DEC_SUM" ]; then
+    echo "PASS - Checksums match, folder dest parameter works"
+else
+    echo "FAIL - Checksums differ!"
+    exit 1
+fi
+
+rm -rf "$ENC_DEST" "$DEC_DEST"
+echo "Done."

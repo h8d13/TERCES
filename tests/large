@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+# Test large file symmetric encryption/decryption with integrity check
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+TERCES="$SCRIPT_DIR/terces"
+
+SIZE_MIB=${1:-10240}  # Default 10 GiB
+TEST_FILE="/tmp/terces_test_${SIZE_MIB}mib.bin"
+
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  SYMMETRIC ENCRYPTION TEST (${SIZE_MIB} MiB)"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+echo -e "\n[1/6] Creating test file..."
+dd if=/dev/urandom of="$TEST_FILE" bs=1M count="$SIZE_MIB" status=progress 2>&1
+
+echo -e "\n[2/6] Computing original checksum..."
+ORIG_SUM=$(sha256sum "$TEST_FILE" | cut -d' ' -f1)
+echo "SHA256: ${ORIG_SUM:0:16}..."
+
+echo -e "\n[3/6] Encrypting (touch your key)..."
+"$TERCES" file enc "$TEST_FILE"
+
+echo -e "\n[4/6] Decrypting (touch your key)..."
+"$TERCES" file dec "${TEST_FILE}.trcs"
+
+echo -e "\n[5/6] Verifying checksum..."
+DEC_FILE=$(ls -t /tmp/terces_test_${SIZE_MIB}mib*.bin 2>/dev/null | head -1)
+if [ -z "$DEC_FILE" ]; then
+    echo "FAIL - Decrypted file not found!"
+    rm -f "$TEST_FILE" "${TEST_FILE}.trcs"
+    exit 1
+fi
+DEC_SUM=$(sha256sum "$DEC_FILE" | cut -d' ' -f1)
+echo "SHA256: ${DEC_SUM:0:16}..."
+
+echo ""
+if [ "$ORIG_SUM" = "$DEC_SUM" ]; then
+    echo "PASS - Checksums match"
+else
+    echo "FAIL - Checksums differ!"
+    rm -f "$TEST_FILE" "$DEC_FILE" "${TEST_FILE}.trcs"
+    exit 1
+fi
+
+echo -e "\n[6/6] Cleaning up..."
+rm -f "$TEST_FILE" "$DEC_FILE" "${TEST_FILE}.trcs"
+echo "Done."

@@ -1,0 +1,244 @@
+# Terces
+
+<picture>
+  <source srcset="./.gitlab/assets/usb_d.svg" media="(prefers-color-scheme: dark)">
+  <img align="left" src="./.gitlab/assets/usb_l.svg" width="80" alt="usb lock icon">
+</picture>
+
+FIDO2 Hardware Security Module key-manager. Interfaces directly with `CTAP2` protocol **locally** in Python. Using your security key's `hmac-secret` extension using `AES-256-GCM`. More can be extended using `python-cryptography` or others. Limit to PIN is **63 chars UTF-8**. 
+Works for *any* Fido2 compliant USB hardware: **YubiKey** (Yubico), **Titan** (Google), **SoloKey** (US based open-source), **Nitrokey** (German leader in HSM), ...
+
+<br clear="left">
+
+<details>
+<summary><b>Why ?</b></summary>
+
+1. **Cloud < hardware only**
+- Cannot fish hardware keys or harder to do (would need browser permissions). 
+- Cannot exfiltrate something that never leaves your device(s).
+2. **Guided but enforced hardware binding**
+- If your key does get stolen, 8 PIN attempts and all keys are gone forever.
+3. **Earns you time, sudoless sudo, etc** and peace of mind 
+- Still works with respective web/mobile apps for auth on websites, etc 
+
+</details>
+
+Set-up on arch (which asumes `base-devel git tar openssl`): 
+
+`sudo pacman -S pam-u2f libfido2 python-fido2 python-cryptography`
+
+In case a distro doesn't package directly:
+
+- [KEKeys/](./KEKeys/README.md) - Setup helpers for `pam-u2f` to build from source latest version for any init system.
+- And integrate to `pam.d` for system-login, login-manager, etc... Helps you blend HSM with software. 
+
+---
+
+## FIDO2 Hardware
+
+```bash
+./terces list           # List devices
+./terces info <term>    # Example "algo", empty for full info
+./terces setup          # Generate mappings file (prompts if PIN is setup already)
+./terces help           # Show all commands
+```
+
+## Usage
+
+**Mappings path is auto-detected based on elevation:**
+| Run as | Mappings path |
+|:-------|:--------------|
+| `./terces` | `~/.config/Yubico/u2f_keys` |
+| `sudo ./terces` | `/etc/u2f_mappings` |
+
+```bash
+./terces unlock             # Test auth on .cfg
+./terces gen <x> <name>     # Generate password (optional: length, store as name) 
+                # ^^^^ Name is empty DO NOT save just generate
+./terces encrypt            # Store secret (prompts: name, secret, optional description)
+./terces decrypt            # Retrieve secret (prompts: name)
+./terces vault              # List stored secrets in vault
+./terces delete <name>      # Delete a secret from vault
+./terces reset              # Deletes all locally stored keys
+./terces test <type> <opt>  # Run test type with options see /tests/
+```
+
+```bash 
+┌──[04:56]─[systemuser_$@hostx]─[~/somewhere]─[04:56]─[git:master]
+└──╼ $ echo "##Terces Demo##"
+##Terces Demo##
+$ cat example.secret | sudo ./terces encrypt api-key "importantkey"
+$ sudo ./terces decrypt api-key | xclip -sel clip
+$ sk-abcdefghijklmnopqrstuvwxyz1234567890
+```
+Pipe friendly! Sudo determines mappings path automatically.
+
+> **Tip**
+>
+> Set a strong PIN on your key but do make sure it's still relatively easy for you to enter, since 8 attempts is the default full lock-out value.
+> Setup local usage since the integration with browsers is already pretty neat, wanted to have a way to achieve the same **for local secrets.**
+
+See again [KEKeys/](./KEKeys/README.md) if you want to compile from scratch and understand a bit more in depth.
+
+> **Important**
+>
+> If you've already have registered keys please see multi-hosts installs [Portable](.gitlab/PORTABLE.md)
+> Do not run setup again as you can keep your exisitng mappings if needed. Or start fresh if desired should be an option in app of provider.
+
+- **Keynames are up to you to remember.** derived `name` and `key_handle` which is **never actually stored.**
+- **Delete files** - After encryption, originals remain. Remove them **when ready.** Terces only print a reminder.
+
+## Installing
+
+---
+
+## Updates
+
+*Disclaimer:* The project will not be built as a backwards compatible one, terces expect the user to **not update** if they are keeping important data.
+Security is being pro-active and finding edge-cases, so building each piece of code with backwards compat would be both a risk and impossible to maintain. 
+
+You can use:
+```bash
+./terces version   # Check for remote hash
+./terces update    # Clones fresh copy to different folder
+```
+> **Tip**
+>
+> Then re-enroll manually to upgrade/migrate. For this purpose keys are stored as a clear convention inside where `TERCES/` lives as: `.d/terces-0003`
+> This also creates a sub-crypt which means the limit of serets is now not 100 but infinite. You obviously keep registering keys in the hardware too normally. 
+
+---
+
+### Setup
+
+- Use `list` and `info` to see key capabilities.
+- Use the `terces.cfg` file to configure to liking or control multiple FIDO2 devices. 
+
+See reference table: [DevConfig](./terces.cfg.dev)
+
+- Running from Python in isolated venv
+
+- Installing *somewhere*
+
+You can place `TERCES/` anywhere on the system or removable media
+
+Then create a symlink either: Check paths: `echo $PATH`
+
+`sudo ln -s /home/johndoe/TECRES/terces /usr/local/bin/terces` or any other `bin/terces` location.
+
+Or `alias terces='/path/to/TERCES/terces'` To use only in shell env. 
+
+> **Note**
+>
+> Once this is setup you do not need the `./` before commands anymore. 
+
+### Existing 
+
+To enroll existing  you can see [portable](.gitlab/PORTABLE.md) or simply copy existing mappings to target carefully. 
+And make sure that the original `pam://hostname` matched in `rp_id` of `terces.cfg`
+
+```bash
+cp path/to/mappings /path/to/usb/mappings
+# perform the same inversly on the target
+```
+Some actions require several PIN/BIO auths for a simple reason: **Terces never** caches anything. Only interface directly with assertion patterns of the keys themselves. Some other actions do not need interaction at all.
+
+---
+
+## Blazing fast
+
+<details>
+<summary><b>Benchmarks ᯓ🏃🏻‍♀️‍➡️</b></summary>
+
+
+### **Standard operations**
+
+Dell enterprise laptop (NVMe M.2 SSD 256GiB):
+Intel(R) Core(TM) i5-1345U (12) @ 4.70 GHz
+16 GiB RAM - Intel Iris Xe Graphics @ 1.25 GHz
+On Ext4 Full Disk Encrypted. 
+
+| Operation | Size | Speed |
+|:----------|:-----|:------|
+| **File Enc** | 10 GiB | 569 MiB/s |
+| **File Dec** | 10 GiB | 540 MiB/s |
+| **File Dec** | 2 GiB | 1295 MiB/s |
+| **Share** | 2 GiB | 1097 MiB/s |
+| **Unshare** | 2 GiB | 1297 MiB/s |
+
+On alpine with a USB 3.2 Gen1.: 2GiB - Enc (1.7s, 1206 MiB/s) - Dec (1.4s, 1470 MiB/s)
+
+### **Folder compression** cascades
+
+Using 100 files of 20MiB each `/dev/urandom`
+
+| Compression | Tar | Enc | Dec |
+|:------------|:----|:----|:----|
+| `lz4` | 3.6s | 881 MiB/s | 1239 MiB/s |
+| `zstd` | 3.7s | 812 MiB/s | 1257 MiB/s |
+| `gzip` | 35.2s | 944 MiB/s | 1240 MiB/s |
+| `none` | 1.2s | 757 MiB/s | 970 MiB/s | 
+
+```bash
+./terces test large 2048   # Single file in MiB
+./terces test asym 2048    # Asymmetric in MiB
+./terces test folder 50 20 # 50 files x 20 MiB
+```
+
+</details>
+
+## Advanced Use
+
+<details>
+<summary><b>More... 🎁</b></summary>
+
+### Files/Folders
+
+Encrypt/decrypt files or folders using FIDO2 hmac-secret derived keys. **Works from root dir where terces lives**
+
+```bash
+./terces file enc /path/to/file <dest>          # Creates file.trcs or folder.tar.trcs
+./terces file dec /path/to/file.trcs <dest>     # Restores original
+```
+
+> `dest` is optional and by default uses same dir of source file. Ex: file is in project root of `TERCES/`
+
+```bash
+./terces file enc lol.jpg 
+./terces file dec lol.jpg.trcs ~/Pictures/  
+``` 
+
+**Important:** Key is derived from `key_handle + filename` — renaming `.trcs` files breaks decryption. This also strips old metadata; only `ciphertext` + `nonce` and new file details remain.
+
+### Sharing (Asymmetric)
+
+```bash
+./terces keypub <label>               # Prepare for sender public key (optional label)
+./terces share <file> <pubkey>        # Encrypt for recipient (no need for FIDO2 key)
+./terces unshare <file.shrd> <label>  # Decrypt from sender using FIDO2 key (optional label)
+```
+
+> `label` is optional but makes keys non-deterministic like previous approaches in this repo.
+
+### FIDO2-backed SSH Keys
+
+Generate SSH keys backed by your security key. Requires terces auth before key generation.
+
+```bash
+./terces ssh <name>            # Generate resident ed25519-sk key or --no-res
+# Set it up with respective provider
+./terces ssh test gitlab.com   # Test directly (with your provider)
+```
+Can find more info [GITUTILS](./.gitlab/GITUTILS.md)
+
+Keys are saved to `~/.ssh/id_<name>_sk` and public key is stored in terces vault as `sshX:<name>`. Can then be retrieved through `decrypt` function or locally.
+
+**Note:** Uses OpenSSH's native FIDO2 support. Your key must support the `eddsa` algorithm.
+
+### N-ZKP 
+
+Create challenges using `json` files exportable to others for verification. 
+This can be used as an API from FIDO2 backed device to say a server? From local to remote verif: [See NZKP](.gitlab/NZKP.md)
+You server can then receive and verify time bound auths directly.
+
+</details>
