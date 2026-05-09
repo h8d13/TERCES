@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# End-to-end remote verifier test. No FIDO2 hardware needed.
+# Exercises: pubkey export, server boot, nonce fetch, prove, verify, replay rejection.
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+SERVER="$SCRIPT_DIR/tests/zkp-server"
+NZKP_TEST="$SCRIPT_DIR/z/nzkp_test.py"
+
+PORT=${PORT:-8765}
+HOST=127.0.0.1
+BASE="http://$HOST:$PORT"
+
+# Deterministic test secret. NOT a real key. Real flow uses FIDO2 hmac-secret.
+SECRET=$(python3 -c 'import secrets; print(int.from_bytes(secrets.token_bytes(32), "big"))')
+
+PYBIN=python3
+[ -x "$SCRIPT_DIR/.venv/bin/python" ] && PYBIN="$SCRIPT_DIR/.venv/bin/python"
+
+echo "================================================="
+echo "  ZKP REMOTE VERIFIER TEST (no FIDO2)"
+echo "================================================="
+
+PUBKEY=$("$PYBIN" "$NZKP_TEST" keygen "$SECRET" | sed 's/^Public key: //')
+PUBKEY_JSON=$(printf '{"public_key": "%s"}' "$PUBKEY")
+echo "[1/5] generated pubkey ($(echo -n "$PUBKEY" | wc -c) chars)"
+
+PUBKEY_JSON="$PUBKEY_JSON" "$PYBIN" "$SERVER" --host "$HOST" --port "$PORT" >/tmp/zkp-server.log 2>&1 &
+SRV_PID=$!
+trap 'kill $SRV_PID 2>/dev/null || true' EXIT
+
+# wait for server
+for _ in $(seq 1 20); do
+    if curl -s -f -o /dev/null "$BASE/challenge" 2>/dev/null; then break; fi
+    sleep 0.1
+done
+echo "[2/5] server up (pid $SRV_PID)"
+
+# fresh nonce + proof
+NONCE_RESP=$(curl -s "$BASE/challenge")
+NONCE=$(echo "$NONCE_RESP" | python3 -c 'import sys,json; print(json.load(sys.stdin)["nonce"])')
+echo "[3/5] got nonce: $NONCE"
+
+PROOF=$("$PYBIN" "$NZKP_TEST" prove "$SECRET" "$NONCE")
+
+VERIFY_BODY=$(python3 -c "import json,sys; print(json.dumps({'proof': json.loads(sys.argv[1]), 'nonce': sys.argv[2]}))" "$PROOF" "$NONCE")
+RESP=$(curl -s -w '\n%{http_code}' -X POST "$BASE/verify" -H 'Content-Type: application/json' -d "$VERIFY_BODY")
+CODE=$(echo "$RESP" | tail -1)
+BODY=$(echo "$RESP" | head -n -1)
+echo "[4/5] verify response: HTTP $CODE $BODY"
+[ "$CODE" = "200" ] || { echo "FAIL: expected 200"; exit 1; }
+
+# replay attempt with same proof + nonce -> should be rejected (nonce consumed)
+REPLAY=$(curl -s -w '\n%{http_code}' -X POST "$BASE/verify" -H 'Content-Type: application/json' -d "$VERIFY_BODY")
+RCODE=$(echo "$REPLAY" | tail -1)
+RBODY=$(echo "$REPLAY" | head -n -1)
+echo "[5/5] replay response: HTTP $RCODE $RBODY"
+[ "$RCODE" = "401" ] || { echo "FAIL: expected 401 on replay"; exit 1; }
+
+echo ""
+echo "================================================="
+echo "  PASS  - verified once, replay rejected"
+echo "================================================="

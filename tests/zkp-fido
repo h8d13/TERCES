@@ -1,59 +1,58 @@
 #!/usr/bin/env bash
-# Test ZKP with FIDO2 integration (requires hardware key)
+# Test ZKP with FIDO2 integration end-to-end against the reference server.
+# Requires: hardware FIDO2 key, terces zkp init has been run OR will run here.
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
 TERCES="$SCRIPT_DIR/terces"
+SERVER="$SCRIPT_DIR/tests/zkp-server"
+PORT=${PORT:-8765}
+HOST=127.0.0.1
+BASE="http://$HOST:$PORT"
 
-BITS=${1:-2048}
+PYBIN=python3
+[ -x "$SCRIPT_DIR/.venv/bin/python" ] && PYBIN="$SCRIPT_DIR/.venv/bin/python"
 
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  ZKP FIDO2 INTEGRATION TEST (${BITS}-bit)"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "================================================="
+echo "  ZKP FIDO2 INTEGRATION TEST"
+echo "================================================="
+echo "  Requires hardware key. PIN + touch prompts incoming."
 echo ""
-echo "  This test requires a FIDO2 hardware key."
-echo "  You will be prompted for PIN and touch."
-echo ""
 
-echo -e "\n[1/5] Initializing ZKP keypair (touch your key)..."
-"$TERCES" zkp init "$BITS"
+echo "[1/6] init keypair (touch your key)..."
+"$TERCES" zkp init
 
-echo -e "\n[2/5] Checking stored keypair info..."
+echo "[2/6] info..."
 "$TERCES" zkp info
 
-echo -e "\n[3/5] Generating proof (touch your key)..."
-PROOF=$("$TERCES" zkp prove 300)
-echo "Proof generated:"
-echo "$PROOF" | head -6
+echo "[3/6] export pubkey + boot server..."
+PUBKEY_JSON=$("$TERCES" zkp export)
+PUBKEY_JSON="$PUBKEY_JSON" "$PYBIN" "$SERVER" --host "$HOST" --port "$PORT" >/tmp/zkp-server.log 2>&1 &
+SRV_PID=$!
+trap 'kill $SRV_PID 2>/dev/null || true' EXIT
+for _ in $(seq 1 20); do
+    curl -s -f -o /dev/null "$BASE/challenge" 2>/dev/null && break
+    sleep 0.1
+done
 
-echo -e "\n[4/5] Verifying proof..."
-VERIFY_OUT=$("$TERCES" zkp verify "$PROOF" 2>&1)
-echo "$VERIFY_OUT"
+echo "[4/6] fetch nonce, prove (touch your key)..."
+NONCE=$(curl -s "$BASE/challenge" | python3 -c 'import sys,json; print(json.load(sys.stdin)["nonce"])')
+PROOF=$("$TERCES" zkp prove "$NONCE" 300)
 
-if echo "$VERIFY_OUT" | grep -q "VALID"; then
-    echo -e "\nPASS - Proof verified"
-else
-    echo -e "\nFAIL - Proof verification failed!"
-    exit 1
-fi
+echo "[5/6] POST proof to server..."
+BODY=$(python3 -c "import json,sys; print(json.dumps({'proof': json.loads(sys.argv[1]), 'nonce': sys.argv[2]}))" "$PROOF" "$NONCE")
+RESP=$(curl -s -w '\n%{http_code}' -X POST "$BASE/verify" -H 'Content-Type: application/json' -d "$BODY")
+CODE=$(echo "$RESP" | tail -1)
+echo "Response: $RESP"
+[ "$CODE" = "200" ] || { echo "FAIL"; exit 1; }
 
-echo -e "\n[5/5] Testing export/verify-remote flow..."
-PUBKEY=$("$TERCES" zkp export)
-echo "Exported public key"
-
-# Generate fresh proof
-PROOF2=$("$TERCES" zkp prove 60)
-REMOTE_OUT=$("$TERCES" zkp verify-remote "$PROOF2" "$PUBKEY" 2>&1)
-echo "$REMOTE_OUT"
-
-if echo "$REMOTE_OUT" | grep -q "VALID"; then
-    echo -e "\nPASS - Remote verification works"
-else
-    echo -e "\nFAIL - Remote verification failed!"
-    exit 1
-fi
+echo "[6/6] replay attempt..."
+RESP=$(curl -s -w '\n%{http_code}' -X POST "$BASE/verify" -H 'Content-Type: application/json' -d "$BODY")
+CODE=$(echo "$RESP" | tail -1)
+echo "Response: $RESP"
+[ "$CODE" = "401" ] || { echo "FAIL: replay should have been rejected"; exit 1; }
 
 echo ""
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "  ALL ZKP FIDO2 TESTS PASSED"
-echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "================================================="
+echo "  PASS - FIDO2 proof verified, replay rejected"
+echo "================================================="

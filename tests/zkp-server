@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+"""
+Reference verifier for terces ZKP. Stdlib only.
+
+Endpoints:
+  GET  /challenge          -> {"nonce": hex, "expires": ts}
+  POST /verify             -> body {"proof": {...}, "nonce": hex}
+                              200 {"ok": true,  "message": "..."}
+                              401 {"ok": false, "message": "..."}
+
+Nonces are single-use. Pubkey loaded once at startup from --pubkey JSON or PUBKEY_JSON env.
+"""
+import argparse
+import json
+import os
+import secrets
+import sys
+import time
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+# Make z/gnilux importable
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, os.path.join(HERE, "..", "z"))
+from gnilux.nzkp import SchnorrZKP  # noqa: E402
+
+NONCE_TTL = 120
+PUBLIC_KEY = None  # set in main()
+
+# nonce -> issued_at. Deleted on first successful verify.
+_nonces: dict[str, int] = {}
+
+
+def _gc():
+    now = int(time.time())
+    for n, ts in list(_nonces.items()):
+        if now - ts > NONCE_TTL:
+            del _nonces[n]
+
+
+class Handler(BaseHTTPRequestHandler):
+    def log_message(self, fmt, *args):
+        sys.stderr.write(f"[zkp-server] {fmt % args}\n")
+
+    def _json(self, code, obj):
+        body = json.dumps(obj).encode()
+        self.send_response(code)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(body)))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def do_GET(self):
+        if self.path != "/challenge":
+            self._json(404, {"ok": False, "message": "not found"})
+            return
+        _gc()
+        nonce = secrets.token_hex(16)
+        _nonces[nonce] = int(time.time())
+        self._json(200, {"nonce": nonce, "expires": int(time.time()) + NONCE_TTL})
+
+    def do_POST(self):
+        if self.path != "/verify":
+            self._json(404, {"ok": False, "message": "not found"})
+            return
+        length = int(self.headers.get("Content-Length", "0"))
+        try:
+            body = json.loads(self.rfile.read(length))
+            proof = body["proof"]
+            nonce = body["nonce"]
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            self._json(400, {"ok": False, "message": f"bad request: {e}"})
+            return
+
+        _gc()
+        if nonce not in _nonces:
+            self._json(401, {"ok": False, "message": "unknown or expired nonce (replay?)"})
+            return
+
+        valid, msg = SchnorrZKP().verify(PUBLIC_KEY, proof, nonce)
+        if valid:
+            del _nonces[nonce]  # one-shot
+            self._json(200, {"ok": True, "message": msg})
+        else:
+            self._json(401, {"ok": False, "message": msg})
+
+
+def main():
+    global PUBLIC_KEY
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--host", default="127.0.0.1")
+    ap.add_argument("--port", type=int, default=8765)
+    ap.add_argument("--pubkey", help="JSON like {\"public_key\": \"...\"}; else PUBKEY_JSON env")
+    args = ap.parse_args()
+
+    pk_json = args.pubkey or os.environ.get("PUBKEY_JSON")
+    if not pk_json:
+        sys.exit("Need --pubkey '<json>' or PUBKEY_JSON env. Get it from: terces zkp export")
+    PUBLIC_KEY = int(json.loads(pk_json)["public_key"])
+
+    srv = HTTPServer((args.host, args.port), Handler)
+    print(f"[zkp-server] listening on http://{args.host}:{args.port}", file=sys.stderr)
+    print(f"[zkp-server] pubkey loaded ({PUBLIC_KEY.bit_length()} bits)", file=sys.stderr)
+    try:
+        srv.serve_forever()
+    except KeyboardInterrupt:
+        pass
+
+
+if __name__ == "__main__":
+    main()
